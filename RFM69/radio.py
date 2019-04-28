@@ -23,8 +23,9 @@ class Radio(object):
             auto_acknowledge (bool): Automatically send acknowledgements
             isHighPower (bool): Is this a high power radio model
             power (int): Power level - a percentage in range 10 to 100.
-            interruptPin (int): Pin number of interrupt pin. This is a pin index not a GPIO number.
-            resetPin (int): Pin number of reset pin. This is a pin index not a GPIO number.
+            board_pin_numbers (bool): Force BOARD (not BCM) pin numbers. Defaults to True.
+            interruptPin (int): Pin number of interrupt pin.
+            resetPin (int): Pin number of reset pin.
             spiBus (int): SPI bus number.
             spiDevice (int): SPI device number.
             promiscuousMode (bool): Listen to all messages not just those addressed to this node ID.
@@ -38,10 +39,12 @@ class Radio(object):
 
         self.address = nodeID
 
+        self.board_pin_numbers = kwargs.get('board_pin_numbers', True)
+
         self.auto_acknowledge = kwargs.get('autoAcknowledge', True)
         self.isRFM69HW = kwargs.get('isHighPower', True)
-        self.intPin = kwargs.get('interruptPin', 18)
-        self.rstPin = kwargs.get('resetPin', 29)
+        self.intPin = kwargs.get('interruptPin', 18 if self.board_pin_numbers else 24)
+        self.rstPin = kwargs.get('resetPin', 29 if self.board_pin_numbers else 5)
         self.spiBus = kwargs.get('spiBus', 0)
         self.spiDevice = kwargs.get('spiDevice', 0)
         self.promiscuousMode = kwargs.get('promiscuousMode', 0)
@@ -74,7 +77,9 @@ class Radio(object):
         self._init_interrupt()
 
     def _init_gpio(self):
-        GPIO.setmode(GPIO.BOARD)
+        if self.board_pin_numbers:
+            GPIO.setmode(GPIO.BOARD)
+
         GPIO.setup(self.intPin, GPIO.IN)
         GPIO.setup(self.rstPin, GPIO.OUT)
 
