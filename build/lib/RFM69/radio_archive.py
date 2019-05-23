@@ -289,7 +289,6 @@ class Radio(object):
         """
         self._setHighPower(False)
         self.sleep()
-        GPIO.cleanup()
 
     def getPackets(self):
         """Get newly received packets.

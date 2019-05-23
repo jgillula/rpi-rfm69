@@ -442,7 +442,6 @@ class Radio(object):
         """
         self._setHighPower(False)
         self.sleep()
-        GPIO.cleanup()
 
     def __str__(self):
         return "Radio RFM69"
