@@ -124,7 +124,7 @@ class Radio(object):
 
     def __exit__(self, *args):
         """When context exits (including when the script is terminated)"""
-        self._shutdown()     
+        self.shutdown()     
        
     def set_frequency(self, FRF):
         """Set the radio frequency"""
@@ -435,7 +435,7 @@ class Radio(object):
             self._writeReg(REG_TESTPA1, 0x55)
             self._writeReg(REG_TESTPA2, 0x70)
 
-    def _shutdown(self):
+    def shutdown(self):
         """Shutdown the radio.
 
         Puts the radio to sleep and cleans up the GPIO connections.
