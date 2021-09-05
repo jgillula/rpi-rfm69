@@ -16,7 +16,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    name='rpi-rfm69++',  # Required
+    name='rpi-rfm69-plus',  # Required
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.3.0',  # Required
     # https://packaging.python.org/specifications/core-metadata/#summary
@@ -26,7 +26,7 @@ setup(
     # https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
     long_description_content_type='text/markdown',  # Optional (see note above)
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='https://github.com/jgillula/rpi-rfm69-plusplus',  # Optional
+    url='https://github.com/jgillula/rpi-rfm69-plus',  # Optional
     # This should be your name or the name of the organization which owns the project
     author='Jeremy Gillula',  # Optional
     # This should be a valid email address corresponding to the author listed above.
@@ -47,8 +47,6 @@ setup(
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
     ],
 
     # This field adds keywords for your project which will appear on the
@@ -65,7 +63,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
+    packages=find_packages(exclude=['docs', 'tests', 'build.bak']),  # Required
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -127,9 +125,9 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/jgillula/rpi-rfm69-plusplus/issues',
-        'Source': 'https://github.com/jgillula/rpi-rfm69-plusplus',
+        'Bug Reports': 'https://github.com/jgillula/rpi-rfm69-plus/issues',
+        'Source': 'https://github.com/jgillula/rpi-rfm69-plus',
         'Documentation': 'http://rpi-rfm69.readthedocs.io/',
-        'Tracker': 'https://github.com/jgillula/rpi-rfm69-plusplus/issues',
+        'Tracker': 'https://github.com/jgillula/rpi-rfm69-plus/issues',
     },
 )
