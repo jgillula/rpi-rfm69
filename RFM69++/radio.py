@@ -36,8 +36,6 @@ class Radio(object):
         if kwargs.get('verbose', False):
             self.logger = self._init_log()
 
-        self.address = nodeID
-
         self.auto_acknowledge = kwargs.get('autoAcknowledge', True)
         self.isRFM69HW = kwargs.get('isHighPower', True)
         self.intPin = kwargs.get('interruptPin', 18)
@@ -51,7 +49,11 @@ class Radio(object):
         self.mode = ""
         self.mode_name = ""
         
-
+        # ListenMode members
+        self._isHighSpeed = True
+        self._encryptKey = None
+        self.listenModeSetDurations(DEFAULT_LISTEN_RX_US, DEFAULT_LISTEN_IDLE_US)
+        
         self.sendSleepTime = 0.05
 
         # 
@@ -59,20 +61,30 @@ class Radio(object):
         self.acks = {}
         #
         #         
+
         self._init_spi()
         self._init_gpio()
-        self._reset_radio()
-        self._set_config(get_config(freqBand, networkID))
+        self._initialize(freqBand, nodeID, networkID)
+
         self._encrypt(kwargs.get('encryptionKey', 0))
-        self._setHighPower(self.isRFM69HW)
         self.set_power_level(kwargs.get('power', 70))
 
+
+    def _initialize(self, freqBand, nodeID, networkID):
+        self._reset_radio()
+        self._set_config(get_config(freqBand, networkID))
+        self._setHighPower(self.isRFM69HW)        
         # Wait for ModeReady
         while (self._readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00:
             pass
 
+        self.address = nodeID
+        self._freqBand = freqBand
+        self._networkID = networkID
         self._init_interrupt()
 
+        return True
+        
     def _init_gpio(self):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.intPin, GPIO.IN)
@@ -258,6 +270,8 @@ class Radio(object):
         while self.intLock:
             time.sleep(.1)
 
+        self.RF69_LISTEN_BURST_REMAINING_MS = 0
+            
         if (self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PAYLOADREADY):
             # avoid RX deadlocks
             self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART)
@@ -331,7 +345,7 @@ class Radio(object):
         # but waiting for mode ready is necessary when going from sleep because the FIFO may not be immediately available from previous mode
         while self.mode == RF69_MODE_SLEEP and self._readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY == 0x00:
             pass
-        self.mode = newMode;
+        self.mode = newMode
 
     def _setAddress(self, addr):
         self.address = addr
@@ -403,9 +417,11 @@ class Radio(object):
     def _encrypt(self, key):
         self._setMode(RF69_MODE_STANDBY)
         if key != 0 and len(key) == 16:
+            self._encryptKey = key
             self.spi.xfer([REG_AESKEY1 | 0x80] + [int(ord(i)) for i in list(key)])
             self._writeReg(REG_PACKETCONFIG2,(self._readReg(REG_PACKETCONFIG2) & 0xFE) | RF_PACKET2_AES_ON)
         else:
+            self._encryptKey = None
             self._writeReg(REG_PACKETCONFIG2,(self._readReg(REG_PACKETCONFIG2) & 0xFE) | RF_PACKET2_AES_OFF)
 
     def _readReg(self, addr):
@@ -522,3 +538,116 @@ class Radio(object):
              
         self.intLock = False
         self.begin_receive()
+
+
+    # 
+    # ListenMode functions
+    # 
+
+    def reinitRadio(self):
+        if (not self._initialize(self._freqBand, self.address, self._networkID)):
+            return False
+        if (self._encryptKey):
+            self._encrypt(self._encryptKey); # Restore the encryption key if necessary
+        if (self._isHighSpeed):
+            self._writeReg(REG_LNA, (self._readReg(REG_LNA) & ~0x3) | RF_LNA_GAINSELECT_AUTO)
+        return True
+
+    def getUsForResolution(self, resolution):
+        if resolution == RF_LISTEN1_RESOL_RX_64 or resolution == RF_LISTEN1_RESOL_IDLE_64:
+            return 64
+        elif resolution == RF_LISTEN1_RESOL_RX_4100 or resolution == RF_LISTEN1_RESOL_IDLE_4100:
+            return 4100
+        elif resolution == RF_LISTEN1_RESOL_RX_262000 or resolution == RF_LISTEN1_RESOL_IDLE_262000:
+            return 262000
+        else:
+            return 0
+                
+    def getCoefForResolution(self, resolution, duration):
+        resolDuration = self.getUsForResolution(resolution)
+        result = int(duration / resolDuration)
+        # If the next-higher coefficient is closer, use that
+        if (abs(duration - ((result + 1) * resolDuration)) < abs(duration - (result * resolDuration))):
+            return result + 1
+        return result
+        
+    def listenModeHighSpeed(self, highSpeed):
+        self._isHighSpeed = highSpeed
+
+    def chooseResolutionAndCoef(self, resolutions, duration):
+        for resolution in resolutions:
+            coef = self.getCoefForResolution(resolution, duration)
+            if (coef <= 255):
+                coefOut = coef
+                resolOut = resolution
+                return (resolOut, coefOut)
+        # out of range
+        return (None, None)
+                
+    def listenModeSetDurations(self, rxDuration, idleDuration):
+        rxResolutions = [ RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000, 0 ]
+        idleResolutions = [ RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000, 0 ]
+
+        (resolOut, coefOut) = self.chooseResolutionAndCoef(rxResolutions, rxDuration)
+        if(resolOut and coefOut):
+            self._rxListenResolution = resolOut
+            self._rxListenCoef = coefOut
+        else:
+            return (None, None)
+        
+        (resolOut, coefOut) = self.chooseResolutionAndCoef(idleResolutions, idleDuration)
+        if(resolOut and coefOut):
+            self._idleListenResolution = resolOut
+            self._idleListenCoef = coefOut
+        else:
+            return (None, None)
+        
+        rxDuration = self.getUsForResolution(self._rxListenResolution) * self._rxListenCoef
+        idleDuration = self.getUsForResolution(self._idleListenResolution) * self._idleListenCoef
+        self._listenCycleDurationUs = rxDuration + idleDuration
+        return (rxDuration, idleDuration)
+        
+    def listenModeGetDurations(self):
+        rxDuration = self.getUsForResolution(self._rxListenResolution) * self._rxListenCoef
+        idleDuration = self.getUsForResolution(self._idleListenResolution) * self._idleListenCoef
+        return (rxDuration, idleDuration)
+        
+    def listenModeApplyHighSpeedSettings(self):
+        if (not self._isHighSpeed): return
+        self._writeReg(REG_BITRATEMSB, RF_BITRATEMSB_200000)
+        self._writeReg(REG_BITRATELSB, RF_BITRATELSB_200000)
+        self._writeReg(REG_FDEVMSB, RF_FDEVMSB_100000)
+        self._writeReg(REG_FDEVLSB, RF_FDEVLSB_100000)
+        self._writeReg( REG_RXBW, RF_RXBW_DCCFREQ_000 | RF_RXBW_MANT_20 | RF_RXBW_EXP_0 )
+
+
+    def listenModeSendBurst(self, targetNode, buff):
+        GPIO.remove_event_detect(self.intPin) #        detachInterrupt(_interruptNum)
+        self._setMode(RF69_MODE_STANDBY)
+        self._writeReg(REG_PACKETCONFIG1, RF_PACKET1_FORMAT_VARIABLE | RF_PACKET1_DCFREE_WHITENING | RF_PACKET1_CRC_ON | RF_PACKET1_CRCAUTOCLEAR_ON )
+        self._writeReg(REG_PACKETCONFIG2, RF_PACKET2_RXRESTARTDELAY_NONE | RF_PACKET2_AUTORXRESTART_ON | RF_PACKET2_AES_OFF)
+        self._writeReg(REG_SYNCVALUE1, 0x5A)
+        self._writeReg(REG_SYNCVALUE2, 0x5A)
+        self.listenModeApplyHighSpeedSettings()
+        self._writeReg(REG_FRFMSB, self._readReg(REG_FRFMSB) + 1)
+        self._writeReg(REG_FRFLSB, self._readReg(REG_FRFLSB))      # MUST write to LSB to affect change!
+        
+        cycleDurationMs = int(self._listenCycleDurationUs / 1000)
+        timeRemaining = int(cycleDurationMs)
+
+        self._setMode(RF69_MODE_TX)
+        numSent = 0
+        startTime = int(time.time() * 1000) #millis()
+
+        while(timeRemaining > 0):
+            if isinstance(buff, str):
+                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, targetNode, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + [int(ord(i)) for i in list(buff)])
+            else:
+                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, targetNode, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + buff)
+            
+            while ((self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_FIFONOTEMPTY) != 0x00):
+                pass # make sure packet is sent before putting more into the FIFO
+            timeRemaining = cycleDurationMs - (int(time.time()*1000) - startTime)
+
+        self._setMode(RF69_MODE_STANDBY)
+        self.reinitRadio()
