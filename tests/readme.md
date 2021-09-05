@@ -3,7 +3,8 @@ Because the library is specifically designed to be tested on a RaspberryPi we al
 
 
 ## Setup test node
-Use the Arduino IDE to upload the script: ```test-node/test-node.ino``` to an Adafruit Feather with RFM69.
+1. Make sure that you're using the right frequency in [```test-node/test-node.ino```](https://github.com/jgillula/rpi-rfm69-plus/blob/0b972c1f468552ac70291cd9ee2f1b8f4b577492/tests/test-node/test-node.ino#L22)
+1. Use the Arduino IDE to upload the script: ```test-node/test-node.ino``` to an Adafruit Feather with RFM69, or a Raspberry Pi with an attached [RFM69 bonnet](https://www.adafruit.com/product/4072)
 
 
 ## Setup test environment on remote RaspberryPi
