@@ -1,12 +1,13 @@
-from RFM69 import Radio, FREQ_433MHZ
+from RFM69plus import Radio
 import datetime
 import time
+from config import *
 
 node_id = 1
 network_id = 100
 recipient_id = 2
 
-with Radio(FREQ_433MHZ, node_id, network_id, isHighPower=True, verbose=True) as radio:
+with Radio(FREQUENCY, node_id, network_id, isHighPower=True, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE) as radio:
     print ("Starting loop...")
     
     rx_counter = 0

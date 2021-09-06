@@ -24,20 +24,20 @@ from unipath import Path, DIRS
 
 class Settings:
     DEPLOY_USER = "pi"                      # Username for access to pi
-    ROOT_NAME = "rfm69radio-test"           # A system friendly name for test project
+    ROOT_NAME = "rfm69plus-test"           # A system friendly name for test project
     DIR_PROJ = "/srv/" + ROOT_NAME + "/"    # The root 
     DIR_ENVS = DIR_PROJ + 'envs/'           # Where the Virtual will live
     DIR_CODE = DIR_PROJ + 'tests/'          # Where the tests will live
     
     SYNC_DIRS = [                      
         ("./", DIR_CODE),
-        ("../RFM69", DIR_CODE)
+        ("../RFM69plus", DIR_CODE)
     ]                  
     # Requirements
     REQUIRMENTS_FILES = [
         DIR_CODE + 'requirements_remote.txt',
     ]
-    TEST_PYTHON_VERSIONS = [ (2,7), (3,5) ]
+    TEST_PYTHON_VERSIONS = [ (3,7) ]
 
 # =============================================================================
 # END OF SETTINGS 
@@ -111,7 +111,7 @@ def sync_files():
         rsync_project(   
             remote_dir=remote_dir,
             local_dir=local_dir,
-            exclude=("fabfile.py","*.pyc",".git","*.db","*.sqlite3", "*.log", "*.csv" '__pychache__', '*.md','*.DS_Store', 'test-node/'),
+            exclude=("fabfile.py","*.pyc",".git","*.db","*.sqlite3", "*.log", "*.csv", '__pycache__', '*.md','*.DS_Store', 'test-node/'),
             extra_opts="--filter 'protect *.csv' --filter 'protect *.json' --filter 'protect *.db'",
             delete=False
         )
@@ -133,7 +133,6 @@ def create_virtualenv(py_version):
     env_path, ver_name, _ = get_env(py_version)
     print_title('Creating Python {} virtual environment: {}'.format(py_version, env_path))
     sudo('pip3 install virtualenv')
-    sudo('pip install virtualenv')
     if files.exists(env_path):
         print("Virtual Environment already exists")
         return
@@ -157,4 +156,4 @@ def run_tests(py_version):
     print_test_title('Running tests in venv: {}'.format(env_path))
     with virtualenv(env_path):
         with cd(Settings.DIR_CODE):
-            run('pytest')
+            run('pytest -x')
