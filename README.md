@@ -1,6 +1,6 @@
 # rpi-rfm69-plus
 This package is a RFM69 radio interface for the Raspberry Pi. It provides a Python wrapper of the [LowPowerLabs RFM69 library](https://github.com/LowPowerLab/RFM69). It is a fork of 
-[Jacob Kittley-Davies' unmaintained repository](https://github.com/jkittley/RFM69), which itself is largely based on the work of [Eric Trombly](https://github.com/etrombly/RFM69) who ported the library from C.
+[Jacob Kittley-Davies' repository](https://github.com/jkittley/RFM69), which itself is largely based on the work of [Eric Trombly](https://github.com/etrombly/RFM69) who ported the library from C.
 
 The package expects to be installed on a Raspberry Pi and depends on the [RPI.GPIO](https://pypi.org/project/RPi.GPIO/) and [spidev](https://pypi.org/project/spidev/) libraries. In addition you need to have an RFM69 radio module directly attached to the Pi. 
 
