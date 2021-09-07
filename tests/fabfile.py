@@ -24,14 +24,14 @@ from unipath import Path, DIRS
 
 class Settings:
     DEPLOY_USER = "pi"                      # Username for access to pi
-    ROOT_NAME = "rfm69plus-test"           # A system friendly name for test project
+    ROOT_NAME = "rfm69-test"           # A system friendly name for test project
     DIR_PROJ = "/srv/" + ROOT_NAME + "/"    # The root 
     DIR_ENVS = DIR_PROJ + 'envs/'           # Where the Virtual will live
     DIR_CODE = DIR_PROJ + 'tests/'          # Where the tests will live
     
     SYNC_DIRS = [                      
         ("./", DIR_CODE),
-        ("../RFM69plus", DIR_CODE)
+        ("../RFM69", DIR_CODE)
     ]                  
     # Requirements
     REQUIRMENTS_FILES = [

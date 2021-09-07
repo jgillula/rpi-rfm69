@@ -1,5 +1,5 @@
 import pytest
-from RFM69plus import Radio
+from RFM69 import Radio
 import config
 
 def test_config():

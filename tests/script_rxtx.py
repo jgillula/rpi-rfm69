@@ -1,4 +1,4 @@
-from RFM69plus import Radio
+from RFM69 import Radio
 import datetime
 import time
 from config import *

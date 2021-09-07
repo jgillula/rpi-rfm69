@@ -1,4 +1,4 @@
-from RFM69plus import FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
+from RFM69 import FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 
 # You must uncomment one of these for tests to work
 # FREQUENCY     = FREQ_315MHZ

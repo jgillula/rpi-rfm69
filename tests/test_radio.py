@@ -2,12 +2,9 @@ import pytest
 import time
 import random
 from enum import Enum
-from RFM69plus import Radio, RF69_MAX_DATA_LEN
+from RFM69 import Radio, RF69_MAX_DATA_LEN
 import config
 
-class Mode(Enum):
-    NORMAL = 0
-    LISTEN = 1
 
 def test_transmit():
     with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
@@ -43,7 +40,7 @@ def test_txrx():
 def test_listenmodeburst():
     time.sleep(2)
     with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
-        test_message = "listen mode test"#[0] + [random.randint(0,255) for i in range(RF69_MAX_DATA_LEN-1)]
+        test_message = "listen mode test"
         radio.listenModeSendBurst(2, test_message)
         radio.begin_receive()
         timeout = time.time() + 5
@@ -52,7 +49,4 @@ def test_listenmodeburst():
         assert radio.has_received_packet()
         packets = radio.get_packets()
         assert packets[0].data == [ord(x) for x in reversed(test_message)]
-#         time.sleep(1)
-#         radio.listenModeSendBurst(2, "mode: " + str(Mode.NORMAL.value))
-#         time.sleep(1)
 
