@@ -16,21 +16,21 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    name='rpi-rfm69-plus',  # Required
+    name='rpi-rfm69',  # Required
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3.0',  # Required
+    version='0.2.0b',  # Required
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='RFM69 radio interface for the Raspberry Pi',  # Required
+    description='RFM69 Radio interface for the Raspberry Pi',  # Required
     # https://packaging.python.org/specifications/core-metadata/#description-optional
     long_description=long_description,  # Optional
     # https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
     long_description_content_type='text/markdown',  # Optional (see note above)
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='https://github.com/jgillula/rpi-rfm69-plus',  # Optional
+    url='http://github.com/jkittley/RFM69',  # Optional
     # This should be your name or the name of the organization which owns the project
-    author='Jeremy Gillula',  # Optional
+    author='Jacob Kittley-Davies',  # Optional
     # This should be a valid email address corresponding to the author listed above.
-    author_email='jgillula+rpirfm69@gmail.com',  # Optional
+    author_email='jacob@kittley.com',  # Optional
     # Classifiers help users find your project by categorizing it.
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[  # Optional
@@ -38,7 +38,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 3 - Alpha',
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
         'Topic :: Communications',
@@ -46,7 +46,11 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 
     # This field adds keywords for your project which will appear on the
@@ -63,7 +67,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(exclude=['docs', 'tests', 'build.bak']),  # Required
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -125,9 +129,9 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/jgillula/rpi-rfm69-plus/issues',
-        'Source': 'https://github.com/jgillula/rpi-rfm69-plus',
+        'Bug Reports': 'http://github.com/jkittley/RFM69/issues',
+        'Source': 'http://github.com/jkittley/RFM69',
         'Documentation': 'http://rpi-rfm69.readthedocs.io/',
-        'Tracker': 'https://github.com/jgillula/rpi-rfm69-plus/issues',
+        'Tracker': 'http://github.com/jkittley/RFM69/issues',
     },
 )
