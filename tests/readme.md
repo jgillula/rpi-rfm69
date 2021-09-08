@@ -14,11 +14,15 @@ Because the library is specifically designed to be tested on a Raspberry Pi we a
 4. Use the Arduino IDE to upload the sketch: ```test-node/test-node.ino``` to an Adafruit Feather with RFM69, a Moteino, or some other Arduino-based microcontroller with an attached RFM69 radio.
 
 ## Setup test environment on remote Raspberry Pi
-Inside a Python 3 environment on your local machine (i.e. not on your Raspberry Pi):
-0. (Optional) Setup a virtual environment by running ```python3 -m venv venv``` followed by ```source venv/bin/activate```
-1. Edit ```config.py``` to choose the right frequency and pins
-2. (Optional) If you want to test listenModeSendBurst, uncomment the ```TEST_LISTEN_MODE_SEND_BURST``` flag in ```config.py```
-3. Run the following commands (still on your local machine, i.e. not on your Raspberry Pi).
+Inside this directory in a Python 3 environment on your local machine (i.e. not on your Raspberry Pi):
+1. (Optional) Setup a virtual environment by running
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+2. Edit ```config.py``` to choose the right frequency and pins
+3. (Optional) If you want to test listenModeSendBurst, uncomment the ```TEST_LISTEN_MODE_SEND_BURST``` flag in ```config.py```
+4. Run the following commands (still on your local machine, i.e. not on your Raspberry Pi).
 ```
 pip3 install --upgrade pip
 pip3 install -r requirements_local.txt
