@@ -66,8 +66,8 @@ void setup() {
 
 void loop() {
   // All test names are as named in test_radio.py
-  char* data = null; //new char[radio.DATALEN];
-  uint8_t datalen = 0;//radio.DATALEN;
+  char* data = null;
+  uint8_t datalen = 0;
   bool success;
 
   // test_transmit
