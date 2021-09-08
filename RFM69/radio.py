@@ -270,8 +270,6 @@ class Radio(object):
         while self.intLock:
             time.sleep(.1)
 
-        self.RF69_LISTEN_BURST_REMAINING_MS = 0
-            
         if (self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PAYLOADREADY):
             # avoid RX deadlocks
             self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART)
