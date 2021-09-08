@@ -1,7 +1,6 @@
 import pytest
 import time
 import random
-from enum import Enum
 from RFM69 import Radio, RF69_MAX_DATA_LEN
 from config import *
 
