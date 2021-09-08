@@ -54,17 +54,25 @@ void setup() {
 
   // Initialize the radio
   radio.initialize(FREQUENCY, NODEID, NETWORKID);
+#if defined(RF69_LISTENMODE_ENABLE)
   radio.listenModeEnd();
+#endif
   radio.spyMode(true);
 #ifdef IS_RFM69HW_HCW
   radio.setHighPower(); //must include this only for RFM69HW/HCW!
 #endif
   Serial.println("Setup complete");
+#if defined(RF69_LISTENMODE_ENABLE)
+  Serial.println("Note: Tests will include listenModeSendBurst");
+#else
+  Serial.println("Note: Skipping testing listenModeSendBurst since it's not set up");
+#endif
   Serial.println();
 }
 
 
 void loop() {
+  Serial.println("Ready to begin tests");
   // All test names are as named in test_radio.py
   char* data = null;
   uint8_t datalen = 0;
@@ -80,7 +88,7 @@ void loop() {
   // test_receive
   Serial.println("----- test_receive -----");
   char test_message[] = "Apple";
-  delay(3000);
+  delay(1000);
   Serial.print(String("Sending test message '") + test_message + String("' of size ") + String(sizeof(test_message), DEC) + String("..."));
   success = radio.sendWithRetry(1, test_message, sizeof(test_message), 0);
   Serial.println(success ? "Success!" : "Failed");
@@ -101,11 +109,11 @@ void loop() {
   delete response;
   Serial.println();
 
-  // test_listenmodeburst
-  Serial.println("----- test_listenmodeburst -----");
-  Serial.println("Entering listen mode");
+#if defined(RF69_LISTENMODE_ENABLE)
+  // test_listenModeSendBurst
+  Serial.println("----- test_listenModeSendBurst -----");
+  Serial.println("Entering listen mode and going to sleep");
   Serial.flush();
-  delay(500);
   radio.listenModeStart();
   long burst_time_remaining = 0;
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
@@ -123,6 +131,10 @@ void loop() {
   success = radio.sendWithRetry(1, response, datalen, 0);
   Serial.println(success ? "Success!" : "Failed");
   delete response;
+  Serial.println();
+#endif
+
+  Serial.println("Tests complete");
   Serial.println();
 }
 

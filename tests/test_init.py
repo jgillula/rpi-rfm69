@@ -1,6 +1,6 @@
 import pytest
 from RFM69 import Radio
-import config
+from config import *
 
 def test_config():
     try:

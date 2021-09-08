@@ -18,3 +18,6 @@ from RFM69 import FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 # RESET_PIN     = 22
 # SPI_DEVICE    = 1
 # IS_HIGH_POWER = True
+
+# Uncomment to test ListenMode
+# TEST_LISTEN_MODE_SEND_BURST = True
