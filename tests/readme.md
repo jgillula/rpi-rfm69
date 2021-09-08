@@ -3,14 +3,14 @@ Because the library is specifically designed to be tested on a Raspberry Pi we a
 
 
 ## Setup test node
-1. Make sure that you're using the right frequency in [```test-node/test-node.ino```]().
-2. Make sure to indicate whether or not your transceiver is high power in [```test-node/test-node.ino```]().
+1. Make sure that you're using the right frequency in [```test-node/test-node.ino```](https://github.com/jgillula/rpi-rfm69-plus/blob/1b5a99294ec45d88f8b8768eee711a2aa74b5b1d/tests/test-node/test-node.ino#L19).
+2. Make sure to indicate whether or not your transceiver is high power in [```test-node/test-node.ino```](https://github.com/jgillula/rpi-rfm69-plus/blob/1b5a99294ec45d88f8b8768eee711a2aa74b5b1d/tests/test-node/test-node.ino#L24).
 3. Use the Arduino IDE to upload the sketch: ```test-node/test-node.ino``` to an Adafruit Feather with RFM69, a Moteino, or some other Arduino-based microcontroller with an attached RFM69 radio.
 
 
 ## Setup test environment on remote Raspberry Pi
-Run the following commands inside a Python 3 environment on your local machine (i.e. not on your Raspberry Pi).
-
+1. Edit ```config.py``` to choose [the right frequency](https://github.com/jgillula/rpi-rfm69-plus/blob/1b5a99294ec45d88f8b8768eee711a2aa74b5b1d/tests/config.py#L3) and [pins](https://github.com/jgillula/rpi-rfm69-plus/blob/1b5a99294ec45d88f8b8768eee711a2aa74b5b1d/tests/config.py#L10)
+2. Run the following commands inside a Python 3 environment on your local machine (i.e. not on your Raspberry Pi).
 ```
 pip3 install -r requirements_local.txt
 fab init -H raspberrypi.local 
@@ -19,7 +19,6 @@ where ```raspberrypi.local``` is the hostname of your Raspberry Pi.
 
 ## Run tests on remote environment
 From inside your testing environment on your local machine run:
-
 ```
 fab test -H raspberrypi.local 
 ```
