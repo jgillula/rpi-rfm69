@@ -12,13 +12,19 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+with open(path.join(here, 'CHANGELOG.md'), encoding='utf-8') as f:
+    long_description += f.read()
+    
+with open(path.join(here, 'VERSION'), encoding='utf-8') as f:
+    version = f.read().strip()
+
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
 
 setup(
     name='rpi-rfm69',  # Required
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.2.0b',  # Required
+    version=version,  # Required
     # https://packaging.python.org/specifications/core-metadata/#summary
     description='RFM69 Radio interface for the Raspberry Pi',  # Required
     # https://packaging.python.org/specifications/core-metadata/#description-optional
@@ -26,11 +32,11 @@ setup(
     # https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
     long_description_content_type='text/markdown',  # Optional (see note above)
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='http://github.com/jkittley/RFM69',  # Optional
+    url='https://github.com/jgillula/rpi-rfm69',  # Optional
     # This should be your name or the name of the organization which owns the project
-    author='Jacob Kittley-Davies',  # Optional
+    author='Jeremy Gillula',  # Optional
     # This should be a valid email address corresponding to the author listed above.
-    author_email='jacob@kittley.com',  # Optional
+    author_email='jgillula+rfm69rpi@gmail.com',  # Optional
     # Classifiers help users find your project by categorizing it.
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[  # Optional
@@ -38,7 +44,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
         'Topic :: Communications',
@@ -46,17 +52,13 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
     ],
 
     # This field adds keywords for your project which will appear on the
     # project page. What does your project relate to?
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords='rfm69 raspberry pi rf69 radio',  # Optional
+    keywords='rfm69 raspberry pi rf69 radio rfm69cw rfm69hcw',  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -67,7 +69,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
+    packages=find_packages(exclude=['contrib', 'docs', 'tests', 'build']),  # Required
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -129,9 +131,9 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        'Bug Reports': 'http://github.com/jkittley/RFM69/issues',
-        'Source': 'http://github.com/jkittley/RFM69',
+        'Bug Reports': 'https://github.com/jgillula/rpi-rfm69/issues',
+        'Source': 'https://github.com/jgillula/rpi-rfm69/issues',
         'Documentation': 'http://rpi-rfm69.readthedocs.io/',
-        'Tracker': 'http://github.com/jkittley/RFM69/issues',
+        'Tracker': 'https://github.com/jgillula/rpi-rfm69/issues',
     },
 )

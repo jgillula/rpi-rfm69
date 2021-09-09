@@ -1,6 +1,6 @@
 .. include:: global.rst
 
-Example - Asynio
+Example - Asyncio
 ================
 A common requirement is to forward received RFM69 packets onward to a web API. However HTTP requests can be slow and we need to consider how to manage possible delays. If we block the radio receiver loop while making the necessary HTTP request, then time critical messages will be forced to wait!
 
@@ -18,6 +18,6 @@ Asyncio RESTful API Gateway
 ---------------------------
 The destination url is set to http://httpbin.org/post. This is a free online service which will echo back the post data sent to the service. It has a whole host (pardon the pun) of other tools for testing HTTP clients.
 
-.. literalinclude:: ../../tests/script_async_gateway.py
+.. literalinclude:: ../../examples/script_async_gateway.py
    :language: python
 

@@ -15,6 +15,7 @@
 
 import os
 import sys
+from datetime import date
 sys.path.insert(0, os.path.abspath('../../'))
 
 from sphinx.highlighting import lexers
@@ -27,13 +28,17 @@ lexers['arduino'] = ArduinoLexer(startinline=True)
 # -- Project information -----------------------------------------------------
 
 project = 'RPI RFM69'
-copyright = '2018, Jacob Kittley-Davies'
+copyright = '{}, rpi-rfm69 developers'.format(date.today().year)
 author = 'Jacob Kittley-Davies'
 
+
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(os.path.join(here, '../../'), 'VERSION'), encoding='utf-8') as f:
+    # The full version, including alpha/beta/rc tags
+    release = f.read().strip()
+
 # The short X.Y version
-version = '0.1'
-# The full version, including alpha/beta/rc tags
-release = '0.1.0a'
+version = ".".join(release.split('.')[0:2])
 
 
 # -- General configuration ---------------------------------------------------

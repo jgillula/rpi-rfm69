@@ -7,7 +7,7 @@
 
 .. warning::
 
-   This project is an Alpha release and as such it may contain bugs. If you spot one then please report it as an issue on Github. We want to make this project awesome and to do that we need your help!
+   This project is a Beta release and as such it may contain bugs. If you spot one then please report it as an `issue on Github <https://github.com/jgillula/rpi-rfm69/issues>`_. We want to make this project awesome and to do that we need your help!
 
 
 Welcome to RFM69Radio's documentation!
@@ -20,16 +20,16 @@ The package expects to be installed on a Raspberry Pi and depends on the `RPI.GP
 
 Contribute
 ----------
-- Issue Tracker: https://github.com/jkittley/RFM69/issues
-- Source Code: https://github.com/jkittley/RFM69
+- Issue Tracker: https://github.com/jgillula/rpi-rfm69/issues
+- Source Code: https://github.com/jgillula/rpi-rfm69/issues
 
 Support
 -------
-If you are having issues, please let us know by submitting an `issue <https://github.com/jkittley/RFM69/issues>`_.
+If you are having issues, please let us know by submitting an `issue <https://github.com/jgillula/rpi-rfm69/issues>`_.
 
 License
 -------
-The project is licensed under the MIT license.
+The project is licensed under the GPL v3 license.
 
 .. toctree::
    :maxdepth: 2

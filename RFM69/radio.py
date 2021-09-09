@@ -542,7 +542,7 @@ class Radio(object):
     # ListenMode functions
     # 
 
-    def reinitRadio(self):
+    def _reinitRadio(self):
         if (not self._initialize(self._freqBand, self.address, self._networkID)):
             return False
         if (self._encryptKey):
@@ -551,7 +551,7 @@ class Radio(object):
             self._writeReg(REG_LNA, (self._readReg(REG_LNA) & ~0x3) | RF_LNA_GAINSELECT_AUTO)
         return True
 
-    def getUsForResolution(self, resolution):
+    def _getUsForResolution(self, resolution):
         if resolution == RF_LISTEN1_RESOL_RX_64 or resolution == RF_LISTEN1_RESOL_IDLE_64:
             return 64
         elif resolution == RF_LISTEN1_RESOL_RX_4100 or resolution == RF_LISTEN1_RESOL_IDLE_4100:
@@ -561,8 +561,8 @@ class Radio(object):
         else:
             return 0
                 
-    def getCoefForResolution(self, resolution, duration):
-        resolDuration = self.getUsForResolution(resolution)
+    def _getCoefForResolution(self, resolution, duration):
+        resolDuration = self._getUsForResolution(resolution)
         result = int(duration / resolDuration)
         # If the next-higher coefficient is closer, use that
         if (abs(duration - ((result + 1) * resolDuration)) < abs(duration - (result * resolDuration))):
@@ -572,9 +572,9 @@ class Radio(object):
     def listenModeHighSpeed(self, highSpeed):
         self._isHighSpeed = highSpeed
 
-    def chooseResolutionAndCoef(self, resolutions, duration):
+    def _chooseResolutionAndCoef(self, resolutions, duration):
         for resolution in resolutions:
-            coef = self.getCoefForResolution(resolution, duration)
+            coef = self._getCoefForResolution(resolution, duration)
             if (coef <= 255):
                 coefOut = coef
                 resolOut = resolution
@@ -586,28 +586,28 @@ class Radio(object):
         rxResolutions = [ RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000, 0 ]
         idleResolutions = [ RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000, 0 ]
 
-        (resolOut, coefOut) = self.chooseResolutionAndCoef(rxResolutions, rxDuration)
+        (resolOut, coefOut) = self._chooseResolutionAndCoef(rxResolutions, rxDuration)
         if(resolOut and coefOut):
             self._rxListenResolution = resolOut
             self._rxListenCoef = coefOut
         else:
             return (None, None)
         
-        (resolOut, coefOut) = self.chooseResolutionAndCoef(idleResolutions, idleDuration)
+        (resolOut, coefOut) = self._chooseResolutionAndCoef(idleResolutions, idleDuration)
         if(resolOut and coefOut):
             self._idleListenResolution = resolOut
             self._idleListenCoef = coefOut
         else:
             return (None, None)
         
-        rxDuration = self.getUsForResolution(self._rxListenResolution) * self._rxListenCoef
-        idleDuration = self.getUsForResolution(self._idleListenResolution) * self._idleListenCoef
+        rxDuration = self._getUsForResolution(self._rxListenResolution) * self._rxListenCoef
+        idleDuration = self._getUsForResolution(self._idleListenResolution) * self._idleListenCoef
         self._listenCycleDurationUs = rxDuration + idleDuration
         return (rxDuration, idleDuration)
         
     def listenModeGetDurations(self):
-        rxDuration = self.getUsForResolution(self._rxListenResolution) * self._rxListenCoef
-        idleDuration = self.getUsForResolution(self._idleListenResolution) * self._idleListenCoef
+        rxDuration = self._getUsForResolution(self._rxListenResolution) * self._rxListenCoef
+        idleDuration = self._getUsForResolution(self._idleListenResolution) * self._idleListenCoef
         return (rxDuration, idleDuration)
         
     def listenModeApplyHighSpeedSettings(self):
@@ -619,7 +619,14 @@ class Radio(object):
         self._writeReg( REG_RXBW, RF_RXBW_DCCFREQ_000 | RF_RXBW_MANT_20 | RF_RXBW_EXP_0 )
 
 
-    def listenModeSendBurst(self, targetNode, buff):
+    def listenModeSendBurst(self, toAddress, buff):
+        """Send a message to nodes in listen mode as a burst
+        
+        Args:
+            toAddress (int): Recipient node's ID
+            buff (str): Message buffer to send 
+        
+        """
         GPIO.remove_event_detect(self.intPin) #        detachInterrupt(_interruptNum)
         self._setMode(RF69_MODE_STANDBY)
         self._writeReg(REG_PACKETCONFIG1, RF_PACKET1_FORMAT_VARIABLE | RF_PACKET1_DCFREE_WHITENING | RF_PACKET1_CRC_ON | RF_PACKET1_CRCAUTOCLEAR_ON )
@@ -639,13 +646,13 @@ class Radio(object):
 
         while(timeRemaining > 0):
             if isinstance(buff, str):
-                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, targetNode, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + [int(ord(i)) for i in list(buff)])
+                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, toAddress, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + [int(ord(i)) for i in list(buff)])
             else:
-                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, targetNode, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + buff)
+                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, toAddress, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + buff)
             
             while ((self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_FIFONOTEMPTY) != 0x00):
                 pass # make sure packet is sent before putting more into the FIFO
             timeRemaining = cycleDurationMs - (int(time.time()*1000) - startTime)
 
         self._setMode(RF69_MODE_STANDBY)
-        self.reinitRadio()
+        self._reinitRadio()
