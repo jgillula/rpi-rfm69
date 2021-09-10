@@ -3,7 +3,7 @@ Because the library is specifically designed to be tested on a Raspberry Pi we a
 
 
 ## Setup test node
-1. Make sure that you're using the right frequency in ```test-node/test-node.ino```.
+1. Make sure that you're using the right frequency in [```test-node/test-node.ino```](test-node/test-node.ino).
 2. Make sure to indicate whether or not your transceiver is high power in ```test-node/test-node.ino```.
 3. (Optional) If you want to test listenModeSendBurst:
     1. Find the directory that contains ```platform.txt``` for the board you're using. For Arduino IDE 1.5+, it's likely of the form ```$HOME/.arduino15/packages/VENDOR/hardware/ARCH/VERSION_NUM/```, where ```$HOME``` is your home directory, ```VENDOR``` is the board vendor (e.g. ```arduino``` or ```Moteino```), ```ARCH``` is the architecture (e.g. ```avr``` or ```sam```), and ```VERSION_NUM``` is the version of the board definition. For example, for my Moteino the directory was ```$HOME/.arduino15/packages/Moteino/hardware/avr/1.6.1```

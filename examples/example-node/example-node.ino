@@ -19,7 +19,7 @@
 // The transmision frequency of the board. Change as needed.
 //#define FREQUENCY      RF69_433MHZ
 //#define FREQUENCY      RF69_868MHZ
-//#define FREQUENCY      RF69_915MHZ
+#define FREQUENCY      RF69_915MHZ
 
 // Uncomment if this board is the RFM69HW/HCW not the RFM69W/CW
 //#define IS_RFM69HW_HCW
@@ -69,31 +69,34 @@ void setup() {
 // Main loop
 unsigned long previousMillis = 0;
 const long sendInterval = 3000;
-     char* data = null;
-  uint8_t datalen = 0;
-void loop() {
-  
-    // Receive
-    if (radio.receiveDone()) {
-       getMessage(data, datalen);     
-       if (radio.ACKRequested()) { radio.sendACK(radio.SENDERID); }
-      delay(100);
-    }
+char* data = null;
+uint8_t datalen = 0;
 
-    
-    // Send     
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= sendInterval) {
-      previousMillis = currentMillis;
-  
-      if (Serial) Serial.println("Sending");
-      char payload[] = "hello from test node";
-      if (radio.sendWithRetry(1, payload, sizeof(payload), 3, 200)) {
-        if (Serial) Serial.println("ACK received");
-      } else {
-        if (Serial) Serial.println("No ACK");
-      }
-  
+void loop() {
+  // Receive
+  if (radio.receiveDone()) {
+    getMessage(data, datalen);
+    if (radio.ACKRequested()) {
+      radio.sendACK(radio.SENDERID);
+    }
+    delay(100);
+  }
+
+
+  // Send
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= sendInterval) {
+    previousMillis = currentMillis;
+
+    Serial.println("Sending");
+    char payload[] = "hello from test node";
+    if (radio.sendWithRetry(1, payload, sizeof(payload), 3, 200)) {
+      Serial.println("ACK received");
+    } else {
+      Serial.println("No ACK");
+    }
+  }
+}
 
 bool getMessage(char*& data, uint8_t& datalen) {
   if (data != null) {
