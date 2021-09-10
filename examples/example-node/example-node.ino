@@ -19,7 +19,7 @@
 // The transmision frequency of the board. Change as needed.
 //#define FREQUENCY      RF69_433MHZ
 //#define FREQUENCY      RF69_868MHZ
-#define FREQUENCY      RF69_915MHZ
+//#define FREQUENCY      RF69_915MHZ
 
 // Uncomment if this board is the RFM69HW/HCW not the RFM69W/CW
 //#define IS_RFM69HW_HCW

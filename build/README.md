@@ -6,7 +6,7 @@ Part of these instructions are cribbed from [https://packaging.python.org/tutori
 . Ensure that the version number is set in [```../setup.py```](../setup.py)
 . Make sure to update [```../CHANGELOG.md```](../CHANGELOG.md)
 . Update the documentation as necessary
-. Make sure all the tests pass per the instructions at [../tests/readme.md](../tests/readme.md)
+. Make sure all the tests pass per the instructions at [```../tests/readme.md```](../tests/readme.md)
 . Push the branch to Github with ```git push --set-upstream origin VERSION``` where ```VERSION``` is the version number/name of the branch
 . Make sure the documentation for that version builds at [https://readthedocs.org/projects/rpi-rfm69/builds/](https://readthedocs.org/projects/rpi-rfm69/builds/)
 . Do ```source build.sh``` in this directory to create a virtual environment and build the release files

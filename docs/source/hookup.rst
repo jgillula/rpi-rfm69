@@ -26,7 +26,7 @@ Pinout guide
 
 .. [#f1] This pin can only support low power mode. Use different supply if you want to use the RFM69HCW in high power mode.
 .. [#f2] This is the interrupt pin. The RFM69HCW module calls an interrupt on the RPI when there is new data to process.
-.. [#f3] These numbers refer to the pin index when you could from top left to bottom right i.e. odd number on the left and evens on the right. These are not the GPIO numbers. The Pinout.xyz is an amazingly helpful tool.
+.. [#f3] These numbers refer to the pin index when you could from top left to bottom right i.e. odd number on the left and evens on the right. These are not the GPIO numbers. `pinout.xyz <https://pinout.xyz>`_ is an amazingly helpful tool.
 
 Setup Examples
 --------------
