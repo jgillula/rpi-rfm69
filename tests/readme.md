@@ -17,7 +17,7 @@ Because the library is specifically designed to be tested on a Raspberry Pi we a
 Inside this directory in a Python 3 environment on your local machine (i.e. not on your Raspberry Pi):
 1. (Optional) Setup a virtual environment by running
 ```
-python3 -m venv test_venv
+python3 -m venv venv_test
 source test_venv/bin/activate
 ```
 2. Edit [```config.py```](config.py) to choose the right frequency and pins

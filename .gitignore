@@ -15,4 +15,5 @@ docs/build
 .eggs/
 
 # Virtual environment files
-venv/
+venv_build/
+venv_test/
