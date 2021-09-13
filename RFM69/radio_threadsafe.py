@@ -52,6 +52,7 @@ class RadioThreadSafe(Radio):
 
         Puts the radio to sleep and cleans up the GPIO connections.
         """
+        self._modeLock.acquire()
         self._setHighPower(False)
         self.sleep()
         GPIO.cleanup([self.intPin, self.rstPin])

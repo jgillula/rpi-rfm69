@@ -656,3 +656,4 @@ class Radio(object):
 
         self._setMode(RF69_MODE_STANDBY)
         self._reinitRadio()
+        self.begin_receive()

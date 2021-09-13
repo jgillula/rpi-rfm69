@@ -32,7 +32,3 @@ def test_init_bad_spi_bus():
 def test_init_bad_spi_device():
     with pytest.raises(IOError) as _:
         Radio(FREQUENCY, 1, spiDevice=-1, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN)
-
-# def test_encryption_key_set():
-#     with Radio(FREQUENCY, 1, encryptionKey="sampleEncryptKey") as radio:
-#         assert radio._enc
