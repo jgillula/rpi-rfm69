@@ -18,7 +18,7 @@ Inside this directory in a Python 3 environment on your local machine (i.e. not 
 1. (Optional) Setup a virtual environment by running
 ```
 python3 -m venv venv_test
-source test_venv/bin/activate
+source venv_test/bin/activate
 ```
 2. Edit [```config.py```](config.py) to choose the right frequency and pins
 3. (Optional) If you want to test listenModeSendBurst, uncomment the ```TEST_LISTEN_MODE_SEND_BURST``` flag in [```config.py```](config.py)
