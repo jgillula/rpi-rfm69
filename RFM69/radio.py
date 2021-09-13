@@ -78,7 +78,7 @@ class Radio(object):
         while (self._readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00:
             pass
 
-        self.address = nodeID
+        self._setAddress(nodeID)
         self._freqBand = freqBand
         self._networkID = networkID
         self._init_interrupt()
@@ -106,12 +106,12 @@ class Radio(object):
         start = time.time()
         while self._readReg(REG_SYNCVALUE1) != 0xAA:
             self._writeReg(REG_SYNCVALUE1, 0xAA)
-            if time.time() - start > 15000:
+            if time.time() - start > 15:
                 raise Exception('Failed to sync with chip')
         start = time.time()
         while self._readReg(REG_SYNCVALUE1) != 0x55:
             self._writeReg(REG_SYNCVALUE1, 0x55)
-            if time.time() - start > 15000:
+            if time.time() - start > 15:
                 raise Exception('Failed to sync with chip')
 
     def _set_config(self, config):
@@ -175,7 +175,7 @@ class Radio(object):
         self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART)
         now = time.time()
         while (not self._canSend()) and time.time() - now < RF69_CSMA_LIMIT_S:
-            self.has_received_packet()
+            pass #self.has_received_packet()
         self._sendFrame(toAddress, buff, requestACK, False)
 
 
@@ -306,7 +306,7 @@ class Radio(object):
 
         """
         while not self._canSend():
-            self.has_received_packet()
+            pass #self.has_received_packet()        
         self._sendFrame(toAddress, buff, False, True)
 
 
@@ -469,7 +469,7 @@ class Radio(object):
         logger = logging.getLogger(__name__)
         handler = logging.StreamHandler()
         handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(thread)d - %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.propagate = False
