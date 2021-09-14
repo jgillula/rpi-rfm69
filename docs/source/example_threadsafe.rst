@@ -6,6 +6,7 @@ Example - Threadsafe Radio Operations
 Differences from Original ``Radio`` Class
 ----------
 The ``RadioThreadSafe`` class is identical to the ``Radio`` class, with three exceptions:
+
 #. The class is threadsafe, so no race conditions should occur
 #. The ``packets`` member has been removed
 #. The class has a new ``get_packet(block=True, timeout=None)`` method, which allows threaded code to block until a packet is avaialble (without having to loop or call ``time.sleep(timeout)``.
