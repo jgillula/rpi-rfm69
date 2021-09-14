@@ -1,4 +1,4 @@
-from RFM69 import Radio
+from RFM69 import Radio, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 import time
 
 node_id = 1

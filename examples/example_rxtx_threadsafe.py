@@ -1,4 +1,4 @@
-from RFM69 import RadioThreadSafe
+from RFM69 import RadioThreadSafe, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 import time
 
 node_id = 1

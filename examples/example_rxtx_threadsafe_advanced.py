@@ -1,4 +1,4 @@
-from RFM69 import RadioThreadSafe
+from RFM69 import RadioThreadSafe, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 import time
 import threading
 
@@ -20,7 +20,7 @@ with RadioThreadSafe(FREQ_915MHZ, node_id, network_id, isHighPower=True, verbose
     print ("Starting loop...")
 
     # Create a thread to run receiveFunction in the background and start it
-    receiveThread = threading.Thread(target = receiveFunction, args=(radio))
+    receiveThread = threading.Thread(target = receiveFunction, args=(radio,))
     receiveThread.start()
 
     while True:
