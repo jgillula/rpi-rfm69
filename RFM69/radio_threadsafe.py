@@ -9,12 +9,12 @@ from .config import get_config
 from .radio import Radio
 
 class RadioThreadSafe(Radio):
-"""Thread-safe version of the Radio class.
-
-This version is identical to the Radio class with the exceptions noted below
-"""
     
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
+        """Thread-safe version of the ``Radio`` class.
+        
+        This version is identical to ``Radio`` with the exceptions noted below
+        """
         self._spiLock = threading.Lock()
         self._sendLock = threading.Condition()
         self._intLock = threading.Lock()
