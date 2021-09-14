@@ -2,7 +2,6 @@ import sys
 import time
 import logging
 import threading
-from datetime import datetime
 
 import spidev
 import RPi.GPIO as GPIO
@@ -59,6 +58,8 @@ class Radio:
 
         self.mode = ""
         self.mode_name = ""
+
+        self.address = None
 
         # ListenMode members
         self._isHighSpeed = True
@@ -542,6 +543,7 @@ class Radio:
     # Radio interrupt handler
     #
 
+    # pylint: disable=unsed-argument
     def _interruptHandler(self, pin):
         self._intLock.acquire()
         with self._modeLock:
@@ -681,7 +683,8 @@ class Radio:
         return (rxDuration, idleDuration)
 
     def listenModeApplyHighSpeedSettings(self):
-        if not self._isHighSpeed: return
+        if not self._isHighSpeed:
+            return
         self._writeReg(REG_BITRATEMSB, RF_BITRATEMSB_200000)
         self._writeReg(REG_BITRATELSB, RF_BITRATELSB_200000)
         self._writeReg(REG_FDEVMSB, RF_FDEVMSB_100000)
@@ -710,7 +713,6 @@ class Radio:
         timeRemaining = int(cycleDurationMs)
 
         self._setMode(RF69_MODE_TX)
-        numSent = 0
         startTime = int(time.time() * 1000) #millis()
 
         while timeRemaining > 0:

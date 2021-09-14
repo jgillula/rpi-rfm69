@@ -22,4 +22,4 @@ jobs:
           path: ".github/workflows/pylint_requirements.txt"
       - name: Analysing the code with pylint
         run: |
-             pylint --disable=line-too-long,invalid-name,unused-wildcard-import,missing-module-docstring,too-many-instance-attributes,fixme,too-many-lines,wildcard-import RFM69
+             pylint --disable=line-too-long,invalid-name,unused-wildcard-import,missing-module-docstring,too-many-instance-attributes,fixme,too-many-lines,wildcard-import,too-many-public-methods RFM69
