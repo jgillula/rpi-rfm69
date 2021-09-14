@@ -20,4 +20,4 @@ jobs:
              pip install RPi.GPIO
       - name: Analysing the code with pylint
         run: |
-             pylint RFM69
+             pylint --disable=line-too-long,invalid-name,unused-wildcard-import RFM69
