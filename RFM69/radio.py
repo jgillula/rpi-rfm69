@@ -159,6 +159,7 @@ class Radio:
         """Put the radio into sleep mode"""
         self._setMode(RF69_MODE_SLEEP)
 
+    # pylint: disable=chained-comparison
     def set_network(self, network_id):
         """Set the network ID (sync)
 
@@ -322,9 +323,9 @@ class Radio:
         self._sendFrame(toAddress, buff, False, True)
 
 
+    # pylint: disable=missing-function-docstring
     @property
     def packets(self):
-        """"""
         print("WARNING! The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", file=sys.stderr)
         return self._packets
 
@@ -543,7 +544,7 @@ class Radio:
     # Radio interrupt handler
     #
 
-    # pylint: disable=unsed-argument
+    # pylint: disable=unused-argument
     def _interruptHandler(self, pin):
         self._intLock.acquire()
         with self._modeLock:
