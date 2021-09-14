@@ -8,6 +8,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+      - uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+                    spidev
+                    RPi.GPIO
       - uses: ricardochaves/python-lint@v1.3.0
         with:
           python-root-list: "RFM69"
@@ -17,7 +23,7 @@ jobs:
           use-black: false
           use-mypy: false
           use-isort: false
-          extra-pylint-options: "--disable=unused-wildcard-import"
+          extra-pylint-options: "--disable=unused-wildcard-import,missing-module-docstring,invalid-name,line-too-long"
           extra-pycodestyle-options: ""
           extra-flake8-options: ""
           extra-black-options: ""
