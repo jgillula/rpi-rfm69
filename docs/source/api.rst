@@ -8,6 +8,12 @@ Radio
 .. autoclass:: RFM69.Radio
     :members:
 
+RadioThreadSafe
+-----
+
+.. autoclass:: RFM69.RadioThreadSafe
+    :members:
+
 Packet
 ------
 
