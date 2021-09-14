@@ -1,4 +1,4 @@
-name: Python Code Quality and Lint
+name: Python Linting
 
 on: [push]
 
@@ -17,7 +17,7 @@ jobs:
           use-black: false
           use-mypy: false
           use-isort: false
-          extra-pylint-options: ""
+          extra-pylint-options: "--disable=unused-wildcard-import"
           extra-pycodestyle-options: ""
           extra-flake8-options: ""
           extra-black-options: ""

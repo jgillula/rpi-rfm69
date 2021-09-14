@@ -1,11 +1,16 @@
-import sys, time, logging, queue, threading
-from datetime import datetime
+import sys
+import time
 import logging
+import threading
+from datetime import datetime
+
 import spidev
 import RPi.GPIO as GPIO
+
 from .registers import *
 from .packet import Packet
 from .config import get_config
+
 
 class Radio(object):
     """RFM69 Radio interface for the Raspberry PI.
