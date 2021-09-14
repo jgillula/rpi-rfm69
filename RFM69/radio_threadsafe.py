@@ -12,7 +12,7 @@ class RadioThreadSafe(Radio):
     """
     Thread-safe version of the :func:`~RFM69.Radio` class.
 
-    This version is identical to ``Radio`` with the exceptions noted below
+    This version is identical to :func:`~RFM69.Radio` with the exceptions noted below
     """
     
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
@@ -50,6 +50,7 @@ class RadioThreadSafe(Radio):
             
 
     def has_received_packet(self):
+        """"""
         return self._packets.qsize() > 0
     
     def num_packets(self):
@@ -72,6 +73,7 @@ class RadioThreadSafe(Radio):
             return None
 
     def get_packets(self):
+        """"""
         # Create packet
         packets = []
         try:
@@ -243,6 +245,7 @@ class RadioThreadSafe(Radio):
 
 
     def send(self, toAddress, buff = "", **kwargs):
+        """"""
         attempts = kwargs.get('attempts', 3)
         wait_time = kwargs.get('wait', 50)
         require_ack = kwargs.get('require_ack', True)
@@ -263,6 +266,7 @@ class RadioThreadSafe(Radio):
 
 
     def listenModeSendBurst(self, toAddress, buff):
+        """"""
         GPIO.remove_event_detect(self.intPin) #        detachInterrupt(_interruptNum)
         self._setMode(RF69_MODE_STANDBY)
         self._writeReg(REG_PACKETCONFIG1, RF_PACKET1_FORMAT_VARIABLE | RF_PACKET1_DCFREE_WHITENING | RF_PACKET1_CRC_ON | RF_PACKET1_CRCAUTOCLEAR_ON )

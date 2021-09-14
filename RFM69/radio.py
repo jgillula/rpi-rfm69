@@ -8,12 +8,15 @@ from .packet import Packet
 from .config import get_config
 
 class Radio(object):
+    """
+    RFM69 Radio interface for the Raspberry PI.
 
+    An RFM69 module is expected to be connected to the SPI interface of the Raspberry Pi. The class is as a context manager so you can instantiate it using the 'with' keyword.
+    """
+    
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
-        """RFM69 Radio interface for the Raspberry PI.
-
-        An RFM69 module is expected to be connected to the SPI interface of the Raspberry Pi. The class is as a context manager so you can instantiate it using the 'with' keyword.
-
+        """Initialize the Radio object.
+        
         Args: 
             freqBand: Frequency band of radio - 315MHz, 868Mhz, 433MHz or 915MHz.
             nodeID (int): The node ID of this device.

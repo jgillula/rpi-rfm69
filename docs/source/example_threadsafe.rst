@@ -5,7 +5,7 @@ Example - Threadsafe Radio Operations
 
 Differences from Original ``Radio`` Class
 ----------
-The ``RadioThreadSafe`` class is identical to the ``Radio`` class, with three exceptions:
+The :func:`~RFM69.RadioThreadSafe` class is identical to the :func:`~RFM69.Radio` class, with three exceptions:
 
 #. The class is threadsafe, so no race conditions should occur
 #. The ``packets`` member has been removed
