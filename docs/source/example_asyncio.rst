@@ -18,6 +18,6 @@ Asyncio RESTful API Gateway
 ---------------------------
 The destination url is set to http://httpbin.org/post. This is a free online service which will echo back the post data sent to the service. It has a whole host (pardon the pun) of other tools for testing HTTP clients.
 
-.. literalinclude:: ../../examples/script_async_gateway.py
+.. literalinclude:: ../../examples/example_async_gateway.py
    :language: python
 

@@ -26,7 +26,7 @@ This ensures that the necessary clean-up code is executed when you exit the cont
 Simple Transceiver
 ------------------
 
-.. literalinclude:: ../../examples/script_rxtx.py
+.. literalinclude:: ../../examples/example_rxtx.py
    :language: python
 
 

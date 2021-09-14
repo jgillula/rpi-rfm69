@@ -9,4 +9,5 @@ Example Code
 
    example_basic
    example_asyncio
+   example_threadsafe
    example_arduino
