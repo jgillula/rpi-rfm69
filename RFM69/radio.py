@@ -12,7 +12,7 @@ from .packet import Packet
 from .config import get_config
 
 
-class Radio(object):
+class Radio:
     """RFM69 Radio interface for the Raspberry PI.
 
     An RFM69 module is expected to be connected to the SPI interface
@@ -165,7 +165,7 @@ class Radio(object):
             network_id (int): Value between 1 and 254.
 
         """
-        assert type(network_id) == int
+        assert isinstance(network_id, int) #type(network_id) == int
         assert network_id > 0 and network_id < 255
         self._writeReg(REG_SYNCVALUE2, network_id)
 
@@ -176,7 +176,7 @@ class Radio(object):
             percent (int): Value between 0 and 100.
 
         """
-        assert type(percent) == int
+        assert isinstance(percent, int) #type(percent) == int
         self.powerLevel = int(round(31 * (percent / 100)))
         self._writeReg(REG_PALEVEL, (self._readReg(REG_PALEVEL) & 0xE0) | self.powerLevel)
 
@@ -323,6 +323,7 @@ class Radio(object):
 
     @property
     def packets(self):
+        """"""
         print("WARNING! The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", file=sys.stderr)
         return self._packets
 
@@ -355,13 +356,12 @@ class Radio(object):
             # Regardless of blocking, if there's a packet available, return it
             if len(self._packets) > 0:
                 return self._packets.pop(0)
-            else:
-                # Otherwise, if we're blocking...
-                if block:
-                    # Wait for us to get a packet
-                    if self._packetLock.wait_for(self.has_received_packet, timeout):
-                        # If we didn't timeout, the above is True, so we pop a packet
-                        return self._packets.pop(0)
+            # Otherwise, if we're blocking...
+            if block:
+                # Wait for us to get a packet
+                if self._packetLock.wait_for(self.has_received_packet, timeout):
+                    # If we didn't timeout, the above is True, so we pop a packet
+                    return self._packets.pop(0)
 
         return None
 

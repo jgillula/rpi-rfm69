@@ -15,9 +15,10 @@ jobs:
       - name: Install dependencies
         run: |
              python -m pip install --upgrade pip
+             pip install wheel
              pip install pylint
              pip install spidev
              pip install RPi.GPIO
       - name: Analysing the code with pylint
         run: |
-             pylint --disable=line-too-long,invalid-name,unused-wildcard-import RFM69
+             pylint --disable=line-too-long,invalid-name,unused-wildcard-import,missing-module-docstring,too-many-instance-attributes,fixme,too-many-lines,wildcard-import RFM69

@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-class Packet(object):
+class Packet:
     """Object to represent received packet. Created internally and
     returned by radio when getPackets() is called.
 
@@ -34,6 +34,7 @@ class Packet(object):
 
     @property
     def data_string(self):
+        """Returns the data as a string"""
         return "".join([chr(letter) for letter in self.data])
 
     def __str__(self):
