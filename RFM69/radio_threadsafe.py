@@ -9,32 +9,12 @@ from .config import get_config
 from .radio import Radio
 
 class RadioThreadSafe(Radio):
+"""Thread-safe version of the Radio class.
 
+This version is identical to the Radio class with the exceptions noted below
+"""
+    
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
-        """RFM69 Radio interface for the Raspberry PI.
-
-        An RFM69 module is expected to be connected to the SPI interface of the Raspberry Pi. The class is a context manager so you can instantiate it using the 'with' keyword.
-
-        This version of the library is thread-safe
-
-        Args: 
-            freqBand: Frequency band of radio - 315MHz, 868Mhz, 433MHz or 915MHz.
-            nodeID (int): The node ID of this device.
-            networkID (int): The network ID
-
-        Keyword Args:
-            auto_acknowledge (bool): Automatically send acknowledgements
-            isHighPower (bool): Is this a high power radio model
-            power (int): Power level - a percentage in range 10 to 100.
-            interruptPin (int): Pin number of interrupt pin. This is a pin index not a GPIO number.
-            resetPin (int): Pin number of reset pin. This is a pin index not a GPIO number.
-            spiBus (int): SPI bus number.
-            spiDevice (int): SPI device number.
-            promiscuousMode (bool): Listen to all messages not just those addressed to this node ID.
-            encryptionKey (str): 16 character encryption key.
-            verbose (bool): Verbose mode - Activates logging to console.
-
-        """
         self._spiLock = threading.Lock()
         self._sendLock = threading.Condition()
         self._intLock = threading.Lock()
@@ -48,10 +28,6 @@ class RadioThreadSafe(Radio):
         
         
     def _shutdown(self):
-        """Shutdown the radio.
-
-        Puts the radio to sleep and cleans up the GPIO connections.
-        """
         self._modeLock.acquire()
         self._setHighPower(False)
         self.sleep()
@@ -62,7 +38,6 @@ class RadioThreadSafe(Radio):
         
 
     def begin_receive(self):
-        """Begin listening for packets"""
         with self._intLock:
             if (self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PAYLOADREADY):
                 # avoid RX deadlocks
@@ -73,14 +48,12 @@ class RadioThreadSafe(Radio):
             
 
     def has_received_packet(self):
-        """Check if packet received
-
-        Returns:
-            bool: True if packet has been received
-
-        """
         return self._packets.qsize() > 0
     
+    def num_packets(self):
+        """Returns the number of received packets"""
+        return self._packets.qsize()
+
     def get_packet(self, block=True, timeout=None):
         """Gets a single packet (thread-safe)
 
@@ -97,11 +70,6 @@ class RadioThreadSafe(Radio):
             return None
 
     def get_packets(self):
-        """Get newly received packets.
-
-        Returns:
-            list: Returns a list of RFM69.Packet objects.
-        """
         # Create packet
         packets = []
         try:
@@ -273,21 +241,6 @@ class RadioThreadSafe(Radio):
 
 
     def send(self, toAddress, buff = "", **kwargs):
-        """Send a message
-        
-        Args:
-            toAddress (int): Recipient node's ID
-            buff (str): Message buffer to send 
-        
-        Keyword Args:
-            attempts (int): Number of attempts
-            wait (int): Milliseconds to wait for acknowledgement
-            require_ack(bool): Require Acknowledgement. If Attempts > 1 this is auto set to True.
-        Returns:
-            bool: If acknowledgement received or None is no acknowledgement requested
-        
-        """
-
         attempts = kwargs.get('attempts', 3)
         wait_time = kwargs.get('wait', 50)
         require_ack = kwargs.get('require_ack', True)
@@ -308,13 +261,6 @@ class RadioThreadSafe(Radio):
 
 
     def listenModeSendBurst(self, toAddress, buff):
-        """Send a message to nodes in listen mode as a burst
-        
-        Args:
-            toAddress (int): Recipient node's ID
-            buff (str): Message buffer to send 
-        
-        """
         GPIO.remove_event_detect(self.intPin) #        detachInterrupt(_interruptNum)
         self._setMode(RF69_MODE_STANDBY)
         self._writeReg(REG_PACKETCONFIG1, RF_PACKET1_FORMAT_VARIABLE | RF_PACKET1_DCFREE_WHITENING | RF_PACKET1_CRC_ON | RF_PACKET1_CRCAUTOCLEAR_ON )
