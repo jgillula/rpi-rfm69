@@ -10,13 +10,11 @@ from .radio import Radio
 
 class RadioThreadSafe(Radio):
     """
-    Thread-safe version of the :func:`~RFM69.Radio` class.
-
-    This version is identical to :func:`~RFM69.Radio` with the exceptions noted below
+    Thread-safe version of the :func:`~RFM69.Radio` class. Identical to :func:`~RFM69.Radio` with the exceptions noted below
     """
     
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
-        """"""
+        """Arguments are identical to :func:`~RFM69.Radio.__init__`"""
         self._spiLock = threading.Lock()
         self._sendLock = threading.Condition()
         self._intLock = threading.Lock()
@@ -55,7 +53,11 @@ class RadioThreadSafe(Radio):
         return self._packets.qsize() > 0
     
     def num_packets(self):
-        """Returns the number of received packets"""
+        """Returns the number of received packets
+
+        Returns:
+            int: Number of packets in the received queue
+        """
         return self._packets.qsize()
 
     def get_packet(self, block=True, timeout=None):
