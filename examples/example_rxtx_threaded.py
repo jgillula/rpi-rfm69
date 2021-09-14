@@ -1,4 +1,4 @@
-from RFM69 import RadioThreadSafe, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
+from RFM69 import Radio, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 import time
 import threading
 
@@ -11,12 +11,13 @@ def receiveFunction(radio):
     while True:
         # This call will block until a packet is received
         packet = radio.get_packet()
+        print("Got a packet: ", end="")
         # Process packet
         print(packet)
 
 # The following are for an Adafruit RFM69HCW Transceiver Radio Bonnet https://www.adafruit.com/product/4072
 # You should adjust them to whatever matches your radio
-with RadioThreadSafe(FREQ_915MHZ, node_id, network_id, isHighPower=True, verbose=True, interruptPin=15, resetPin=22, spiDevice=1) as radio:
+with Radio(FREQ_915MHZ, node_id, network_id, isHighPower=True, verbose=False, interruptPin=15, resetPin=22, spiDevice=1) as radio:
     print ("Starting loop...")
 
     # Create a thread to run receiveFunction in the background and start it

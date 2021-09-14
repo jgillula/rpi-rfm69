@@ -8,16 +8,18 @@ from .packet import Packet
 from .config import get_config
 
 class Radio(object):
-    """
-    RFM69 Radio interface for the Raspberry PI.
+    """RFM69 Radio interface for the Raspberry PI.
 
-    An RFM69 module is expected to be connected to the SPI interface of the Raspberry Pi. The class is as a context manager so you can instantiate it using the 'with' keyword.
+    An RFM69 module is expected to be connected to the SPI interface
+    of the Raspberry Pi. The class is as a context manager so you can
+    instantiate it using the 'with' keyword.
+
     """
-    
+
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
         """Initialize the Radio object.
-        
-        Args: 
+
+        Args:
             freqBand: Frequency band of radio - 315MHz, 868Mhz, 433MHz or 915MHz.
             nodeID (int): The node ID of this device.
             networkID (int): The network ID
@@ -46,7 +48,7 @@ class Radio(object):
         self.spiBus = kwargs.get('spiBus', 0)
         self.spiDevice = kwargs.get('spiDevice', 0)
         self.promiscuousMode = kwargs.get('promiscuousMode', 0)
-        
+
         # Thread-safe locks
         self._spiLock = threading.Lock()
         self._sendLock = threading.Condition()
@@ -56,21 +58,18 @@ class Radio(object):
 
         self.mode = ""
         self.mode_name = ""
-        
+
         # ListenMode members
         self._isHighSpeed = True
         self._encryptKey = None
         self.listenModeSetDurations(DEFAULT_LISTEN_RX_US, DEFAULT_LISTEN_IDLE_US)
-        
+
         self.sendSleepTime = 0.05
 
-        # 
         self._packets = []
         self._packetLock = threading.Condition()
         # self._packetQueue = queue.Queue()
-        self.acks = {}        
-        #
-        #         
+        self.acks = {}
 
         self._init_spi()
         self._init_gpio()
@@ -83,7 +82,7 @@ class Radio(object):
     def _initialize(self, freqBand, nodeID, networkID):
         self._reset_radio()
         self._set_config(get_config(freqBand, networkID))
-        self._setHighPower(self.isRFM69HW)        
+        self._setHighPower(self.isRFM69HW)
         # Wait for ModeReady
         while (self._readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00:
             pass
@@ -94,7 +93,7 @@ class Radio(object):
         self._init_interrupt()
 
         return True
-        
+
     def _init_gpio(self):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.intPin, GPIO.IN)
@@ -133,9 +132,9 @@ class Radio(object):
         GPIO.add_event_detect(self.intPin, GPIO.RISING, callback=self._interruptHandler)
 
 
-    # 
+    #
     # End of Init
-    # 
+    #
 
     def __enter__(self):
         """When the context begins"""
@@ -146,8 +145,8 @@ class Radio(object):
 
     def __exit__(self, *args):
         """When context exits (including when the script is terminated)"""
-        self._shutdown()     
-       
+        self._shutdown()
+
     def set_frequency(self, FRF):
         """Set the radio frequency"""
         self._writeReg(REG_FRFMSB, FRF >> 16)
@@ -160,7 +159,7 @@ class Radio(object):
 
     def set_network(self, network_id):
         """Set the network ID (sync)
-        
+
         Args:
             network_id (int): Value between 1 and 254.
 
@@ -171,49 +170,48 @@ class Radio(object):
 
     def set_power_level(self, percent):
         """Set the transmit power level
-        
+
         Args:
             percent (int): Value between 0 and 100.
 
         """
         assert type(percent) == int
-        self.powerLevel = int( round(31 * (percent / 100)))
+        self.powerLevel = int(round(31 * (percent / 100)))
         self._writeReg(REG_PALEVEL, (self._readReg(REG_PALEVEL) & 0xE0) | self.powerLevel)
 
 
-    def _send(self, toAddress, buff = "", requestACK = False):
-        self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART)
+    def _send(self, toAddress, buff="", requestACK=False):
+        self._writeReg(REG_PACKETCONFIG2,
+                       (self._readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART)
         now = time.time()
         while (not self._canSend()) and time.time() - now < RF69_CSMA_LIMIT_S:
             pass #self.has_received_packet()
         self._sendFrame(toAddress, buff, requestACK, False)
 
 
-    def broadcast(self, buff = ""):
+    def broadcast(self, buff=""):
         """Broadcast a message to network i.e. sends to node 255 with no ACK request.
 
         Args:
-            buff (str): Message buffer to send 
-
+            buff (str): Message buffer to send
         """
-
         broadcastAddress = 255
         self.send(broadcastAddress, buff, require_ack=False)
 
-    def send(self, toAddress, buff = "", **kwargs):
+    def send(self, toAddress, buff="", **kwargs):
         """Send a message
-        
+
         Args:
             toAddress (int): Recipient node's ID
-            buff (str): Message buffer to send 
-        
+            buff (str): Message buffer to send
+
         Keyword Args:
             attempts (int): Number of attempts
             wait (int): Milliseconds to wait for acknowledgement
             require_ack(bool): Require Acknowledgement. If Attempts > 1 this is auto set to True.
+
         Returns:
             bool: If acknowledgement received or None is no acknowledgement requested
-        
         """
         attempts = kwargs.get('attempts', 3)
         wait_time = kwargs.get('wait', 50)
@@ -222,20 +220,20 @@ class Radio(object):
             require_ack = True
 
         for _ in range(0, attempts):
-            self._send(toAddress, buff, attempts>0 )
+            self._send(toAddress, buff, attempts > 0)
 
             if not require_ack:
                 return None
 
             with self._ackLock:
-                if self._ackLock.wait_for(lambda : self._ACKReceived(toAddress), wait_time/1000):
+                if self._ackLock.wait_for(lambda: self._ACKReceived(toAddress), wait_time/1000):
                     return True
-        
+
         return False
 
     def read_temperature(self, calFactor=0):
         """Read the temperature of the radios CMOS chip.
-        
+
         Args:
             calFactor: Additional correction to corrects the slope, rising temp = rising val
 
@@ -253,7 +251,7 @@ class Radio(object):
 
     def calibrate_radio(self):
         """Calibrate the internal RC oscillator for use in wide temperature variations.
-        
+
         See RFM69 datasheet section [4.3.5. RC Timer Accuracy] for more information.
         """
         self._writeReg(REG_OSC1, RF_OSC1_RCCAL_START)
@@ -274,7 +272,7 @@ class Radio(object):
     def begin_receive(self):
         """Begin listening for packets"""
         with self._intLock:
-            if (self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PAYLOADREADY):
+            if self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PAYLOADREADY:
                 # avoid RX deadlocks
                 self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFB) | RF_PACKET2_RXRESTART)
             #set DIO0 to "PAYLOADREADY" in receive mode
@@ -286,7 +284,6 @@ class Radio(object):
 
         Returns:
             bool: True if packet has been received
-
         """
         # return self._packetQueue.qsize() > 0
         with self._packetLock:
@@ -309,17 +306,17 @@ class Radio(object):
             packets = list(self._packets)
             self._packets = []
             return packets
-                    
-   
-    def send_ack(self, toAddress, buff = ""):
+
+
+    def send_ack(self, toAddress, buff=""):
         """Send an acknowledgemet packet
 
-        Args: 
+        Args:
             toAddress (int): Recipient node's ID
 
         """
         while not self._canSend():
-            pass #self.has_received_packet()        
+            pass #self.has_received_packet()
         self._sendFrame(toAddress, buff, False, True)
 
 
@@ -328,7 +325,7 @@ class Radio(object):
         print("WARNING! The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", file=sys.stderr)
         return self._packets
 
-    
+
     def num_packets(self):
         """Returns the number of received packets
 
@@ -367,9 +364,9 @@ class Radio(object):
 
         return None
 
-    # 
+    #
     # Internal functions
-    # 
+    #
 
     def _setMode(self, newMode):
         with self._modeLock:
@@ -423,7 +420,7 @@ class Radio(object):
             self.acks.pop(fromNodeID, None)
             return True
         return False
-    
+
     def _sendFrame(self, toAddress, buff, requestACK, sendACK):
         #turn off receiver to prevent reception while filling fifo
         self._setMode(RF69_MODE_STANDBY)
@@ -433,7 +430,7 @@ class Radio(object):
         # DIO0 is "Packet Sent"
         self._writeReg(REG_DIOMAPPING1, RF_DIOMAPPING1_DIO0_00)
 
-        if (len(buff) > RF69_MAX_DATA_LEN):
+        if len(buff) > RF69_MAX_DATA_LEN:
             buff = buff[0:RF69_MAX_DATA_LEN]
 
         ack = 0
@@ -452,7 +449,7 @@ class Radio(object):
             result = self._sendLock.wait(1.0)
         self._setMode(RF69_MODE_RX)
 
-    def _readRSSI(self, forceTrigger = False):
+    def _readRSSI(self, forceTrigger=False):
         rssi = 0
         if forceTrigger:
             self._writeReg(REG_RSSICONFIG, RF_RSSI_START)
@@ -468,10 +465,10 @@ class Radio(object):
             self._encryptKey = key
             with self._spiLock:
                 self.spi.xfer([REG_AESKEY1 | 0x80] + [int(ord(i)) for i in list(key)])
-            self._writeReg(REG_PACKETCONFIG2,(self._readReg(REG_PACKETCONFIG2) & 0xFE) | RF_PACKET2_AES_ON)
+            self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFE) | RF_PACKET2_AES_ON)
         else:
             self._encryptKey = None
-            self._writeReg(REG_PACKETCONFIG2,(self._readReg(REG_PACKETCONFIG2) & 0xFE) | RF_PACKET2_AES_OFF)
+            self._writeReg(REG_PACKETCONFIG2, (self._readReg(REG_PACKETCONFIG2) & 0xFE) | RF_PACKET2_AES_OFF)
 
     def _readReg(self, addr):
         with self._spiLock:
@@ -534,15 +531,15 @@ class Radio(object):
 
     def _debug(self, *args):
         if self.logger is not None:
-             self.logger.debug(*args)
-      
+            self.logger.debug(*args)
+
     def _error(self, *args):
         if self.logger is not None:
-             self.logger.error(*args)
- 
-    # 
+            self.logger.error(*args)
+
+    #
     # Radio interrupt handler
-    # 
+    #
 
     def _interruptHandler(self, pin):
         self._intLock.acquire()
@@ -554,8 +551,8 @@ class Radio(object):
                 self._setMode(RF69_MODE_STANDBY)
 
                 with self._spiLock:
-                    payload_length, target_id, sender_id, CTLbyte = self.spi.xfer2([REG_FIFO & 0x7f,0,0,0,0])[1:]
-                    
+                    payload_length, target_id, sender_id, CTLbyte = self.spi.xfer2([REG_FIFO & 0x7f, 0, 0, 0, 0])[1:]
+
                 if payload_length > 66:
                     payload_length = 66
 
@@ -566,12 +563,12 @@ class Radio(object):
                     return
 
                 data_length = payload_length - 3
-                ack_received  = bool(CTLbyte & 0x80)
+                ack_received = bool(CTLbyte & 0x80)
                 ack_requested = bool(CTLbyte & 0x40)
                 with self._spiLock:
                     data = self.spi.xfer2([REG_FIFO & 0x7f] + [0 for i in range(0, data_length)])[1:]
                 rssi = self._readRSSI()
-                    
+
                 if ack_received:
                     self._debug("Incoming ack from {}".format(sender_id))
                     # Record acknowledgement
@@ -593,6 +590,7 @@ class Radio(object):
                         self._packets.append(
                             Packet(int(target_id), int(sender_id), int(rssi), list(data))
                         )
+                        self._packetLock.notify_all()
 
                 # Send acknowledgement if needed
                 if ack_requested and self.auto_acknowledge:
@@ -609,16 +607,16 @@ class Radio(object):
         self._intLock.release()
 
 
-    # 
+    #
     # ListenMode functions
-    # 
+    #
 
     def _reinitRadio(self):
-        if (not self._initialize(self._freqBand, self.address, self._networkID)):
+        if not self._initialize(self._freqBand, self.address, self._networkID):
             return False
-        if (self._encryptKey):
-            self._encrypt(self._encryptKey); # Restore the encryption key if necessary
-        if (self._isHighSpeed):
+        if self._encryptKey:
+            self._encrypt(self._encryptKey) # Restore the encryption key if necessary
+        if self._isHighSpeed:
             self._writeReg(REG_LNA, (self._readReg(REG_LNA) & ~0x3) | RF_LNA_GAINSELECT_AUTO)
         return True
 
@@ -631,83 +629,82 @@ class Radio(object):
             return 262000
         else:
             return 0
-                
+
     def _getCoefForResolution(self, resolution, duration):
         resolDuration = self._getUsForResolution(resolution)
         result = int(duration / resolDuration)
         # If the next-higher coefficient is closer, use that
-        if (abs(duration - ((result + 1) * resolDuration)) < abs(duration - (result * resolDuration))):
+        if abs(duration - ((result + 1) * resolDuration)) < abs(duration - (result * resolDuration)):
             return result + 1
         return result
-        
+
     def listenModeHighSpeed(self, highSpeed):
         self._isHighSpeed = highSpeed
 
     def _chooseResolutionAndCoef(self, resolutions, duration):
         for resolution in resolutions:
             coef = self._getCoefForResolution(resolution, duration)
-            if (coef <= 255):
+            if coef <= 255:
                 coefOut = coef
                 resolOut = resolution
                 return (resolOut, coefOut)
         # out of range
         return (None, None)
-                
+
     def listenModeSetDurations(self, rxDuration, idleDuration):
-        rxResolutions = [ RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000, 0 ]
-        idleResolutions = [ RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000, 0 ]
+        rxResolutions = [RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000, 0]
+        idleResolutions = [RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000, 0]
 
         (resolOut, coefOut) = self._chooseResolutionAndCoef(rxResolutions, rxDuration)
-        if(resolOut and coefOut):
+        if resolOut and coefOut:
             self._rxListenResolution = resolOut
             self._rxListenCoef = coefOut
         else:
             return (None, None)
-        
+
         (resolOut, coefOut) = self._chooseResolutionAndCoef(idleResolutions, idleDuration)
         if(resolOut and coefOut):
             self._idleListenResolution = resolOut
             self._idleListenCoef = coefOut
         else:
             return (None, None)
-        
+
         rxDuration = self._getUsForResolution(self._rxListenResolution) * self._rxListenCoef
         idleDuration = self._getUsForResolution(self._idleListenResolution) * self._idleListenCoef
         self._listenCycleDurationUs = rxDuration + idleDuration
         return (rxDuration, idleDuration)
-        
+
     def listenModeGetDurations(self):
         rxDuration = self._getUsForResolution(self._rxListenResolution) * self._rxListenCoef
         idleDuration = self._getUsForResolution(self._idleListenResolution) * self._idleListenCoef
         return (rxDuration, idleDuration)
-        
+
     def listenModeApplyHighSpeedSettings(self):
-        if (not self._isHighSpeed): return
+        if not self._isHighSpeed: return
         self._writeReg(REG_BITRATEMSB, RF_BITRATEMSB_200000)
         self._writeReg(REG_BITRATELSB, RF_BITRATELSB_200000)
         self._writeReg(REG_FDEVMSB, RF_FDEVMSB_100000)
         self._writeReg(REG_FDEVLSB, RF_FDEVLSB_100000)
-        self._writeReg( REG_RXBW, RF_RXBW_DCCFREQ_000 | RF_RXBW_MANT_20 | RF_RXBW_EXP_0 )
+        self._writeReg(REG_RXBW, RF_RXBW_DCCFREQ_000 | RF_RXBW_MANT_20 | RF_RXBW_EXP_0)
 
 
     def listenModeSendBurst(self, toAddress, buff):
         """Send a message to nodes in listen mode as a burst
-        
+
         Args:
             toAddress (int): Recipient node's ID
-            buff (str): Message buffer to send 
-        
+            buff (str): Message buffer to send
         """
         GPIO.remove_event_detect(self.intPin) #        detachInterrupt(_interruptNum)
         self._setMode(RF69_MODE_STANDBY)
-        self._writeReg(REG_PACKETCONFIG1, RF_PACKET1_FORMAT_VARIABLE | RF_PACKET1_DCFREE_WHITENING | RF_PACKET1_CRC_ON | RF_PACKET1_CRCAUTOCLEAR_ON )
+        self._writeReg(REG_PACKETCONFIG1, RF_PACKET1_FORMAT_VARIABLE | RF_PACKET1_DCFREE_WHITENING | RF_PACKET1_CRC_ON | RF_PACKET1_CRCAUTOCLEAR_ON)
         self._writeReg(REG_PACKETCONFIG2, RF_PACKET2_RXRESTARTDELAY_NONE | RF_PACKET2_AUTORXRESTART_ON | RF_PACKET2_AES_OFF)
         self._writeReg(REG_SYNCVALUE1, 0x5A)
         self._writeReg(REG_SYNCVALUE2, 0x5A)
         self.listenModeApplyHighSpeedSettings()
         self._writeReg(REG_FRFMSB, self._readReg(REG_FRFMSB) + 1)
         self._writeReg(REG_FRFLSB, self._readReg(REG_FRFLSB))      # MUST write to LSB to affect change!
-        
+
         cycleDurationMs = int(self._listenCycleDurationUs / 1000)
         timeRemaining = int(cycleDurationMs)
 
@@ -715,16 +712,17 @@ class Radio(object):
         numSent = 0
         startTime = int(time.time() * 1000) #millis()
 
-        while(timeRemaining > 0):
+        while timeRemaining > 0:
             with self._spiLock:
                 if isinstance(buff, str):
                     self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, toAddress, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + [int(ord(i)) for i in list(buff)])
                 else:
                     self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 4, toAddress, self.address, timeRemaining & 0xFF, (timeRemaining >> 8) & 0xFF] + buff)
-            
-            while ((self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_FIFONOTEMPTY) != 0x00):
+
+            while (self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_FIFONOTEMPTY) != 0x00:
                 pass # make sure packet is sent before putting more into the FIFO
             timeRemaining = cycleDurationMs - (int(time.time()*1000) - startTime)
 
         self._setMode(RF69_MODE_STANDBY)
         self._reinitRadio()
+        self.begin_receive()

@@ -31,7 +31,8 @@ class Settings:
     
     SYNC_DIRS = [                      
         ("./", DIR_CODE),
-        ("../RFM69", DIR_CODE)
+        ("../RFM69", DIR_CODE),
+        ("../examples", DIR_CODE)
     ]                  
     # Requirements
     REQUIREMENTS_FILES = [
@@ -102,7 +103,7 @@ def make_dirs():
             sudo('chown -R %s %s' % (env.user, d))
     set_permissions()
 
-# Sync project fioles to server
+# Sync project files to server
 def sync_files():
     print_title('Synchronising code')
     for local_dir, remote_dir in Settings.SYNC_DIRS:
@@ -110,7 +111,7 @@ def sync_files():
         rsync_project(   
             remote_dir=remote_dir,
             local_dir=local_dir,
-            exclude=("fabfile.py","*.pyc",".git","*.db","*.sqlite3", "*.log", "*.csv", '__pycache__', '*.md','*.DS_Store', 'test-node/', 'requirements_local.txt', 'venv_test'),
+            exclude=("fabfile.py","*.pyc",".git","*.db","*.sqlite3", "*.log", "*.csv", '__pycache__', '*.md','*.DS_Store', '*~', 'test-node/', 'requirements_local.txt', 'venv_test', 'example-node/'),
             extra_opts="--filter 'protect *.csv' --filter 'protect *.json' --filter 'protect *.db'",
             delete=False
         )
