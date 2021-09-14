@@ -21,10 +21,11 @@ class RadioThreadSafe(Radio):
         self._ackLock = threading.Condition()
         self._modeLock = threading.RLock()
         super().__init__(freqBand, nodeID, networkID, **kwargs)
+        del self._packets
         del self.packets
         del self.sendLock
         del self.intLock
-        self._packets = queue.Queue()
+        self._packetQueue = queue.Queue()
         
         
     def _shutdown(self):
@@ -50,15 +51,11 @@ class RadioThreadSafe(Radio):
 
     def has_received_packet(self):
         """"""
-        return self._packets.qsize() > 0
+        return self._packetQueue.qsize() > 0
     
     def num_packets(self):
-        """Returns the number of received packets
-
-        Returns:
-            int: Number of packets in the received queue
-        """
-        return self._packets.qsize()
+        """"""
+        return self._packetQueue.qsize()
 
     def get_packet(self, block=True, timeout=None):
         """Gets a single packet (thread-safe)
@@ -71,7 +68,7 @@ class RadioThreadSafe(Radio):
             Packet: The oldest packet received if available, or None if no packet is available
         """
         try:
-            return self._packets.get(block, timeout)
+            return self._packetQueue.get(block, timeout)
         except queue.Empty:
             return None
 
@@ -81,7 +78,7 @@ class RadioThreadSafe(Radio):
         packets = []
         try:
             while True:
-                packets.append(self._packets.get_nowait())
+                packets.append(self._packetQueue.get_nowait())
         except queue.Empty:
             pass
         return packets
@@ -227,7 +224,7 @@ class RadioThreadSafe(Radio):
                 # When message received
                 if not ack_received:
                     self._debug("Incoming data packet")
-                    self._packets.put(
+                    self._packetQueue.put(
                         Packet(int(target_id), int(sender_id), int(rssi), list(data))
                     )
 
