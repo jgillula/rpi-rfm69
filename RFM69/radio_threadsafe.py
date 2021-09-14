@@ -16,6 +16,7 @@ class RadioThreadSafe(Radio):
     """
     
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
+        """"""
         self._spiLock = threading.Lock()
         self._sendLock = threading.Condition()
         self._intLock = threading.Lock()
