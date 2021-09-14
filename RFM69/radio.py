@@ -14,29 +14,25 @@ class Radio(object):
     of the Raspberry Pi. The class is as a context manager so you can
     instantiate it using the 'with' keyword.
 
+    Args:
+        freqBand: Frequency band of radio - 315MHz, 868Mhz, 433MHz or 915MHz.
+        nodeID (int): The node ID of this device.
+        networkID (int): The network ID
+
+    Keyword Args:
+        auto_acknowledge (bool): Automatically send acknowledgements
+        isHighPower (bool): Is this a high power radio model
+        power (int): Power level - a percentage in range 10 to 100.
+        interruptPin (int): Pin number of interrupt pin. This is a pin index not a GPIO number.
+        resetPin (int): Pin number of reset pin. This is a pin index not a GPIO number.
+        spiBus (int): SPI bus number.
+        spiDevice (int): SPI device number.
+        promiscuousMode (bool): Listen to all messages not just those addressed to this node ID.
+        encryptionKey (str): 16 character encryption key.
+        verbose (bool): Verbose mode - Activates logging to console.
     """
 
     def __init__(self, freqBand, nodeID, networkID=100, **kwargs):
-        """Initialize the Radio object.
-
-        Args:
-            freqBand: Frequency band of radio - 315MHz, 868Mhz, 433MHz or 915MHz.
-            nodeID (int): The node ID of this device.
-            networkID (int): The network ID
-
-        Keyword Args:
-            auto_acknowledge (bool): Automatically send acknowledgements
-            isHighPower (bool): Is this a high power radio model
-            power (int): Power level - a percentage in range 10 to 100.
-            interruptPin (int): Pin number of interrupt pin. This is a pin index not a GPIO number.
-            resetPin (int): Pin number of reset pin. This is a pin index not a GPIO number.
-            spiBus (int): SPI bus number.
-            spiDevice (int): SPI device number.
-            promiscuousMode (bool): Listen to all messages not just those addressed to this node ID.
-            encryptionKey (str): 16 character encryption key.
-            verbose (bool): Verbose mode - Activates logging to console.
-
-        """
         self.logger = None
         if kwargs.get('verbose', False):
             self.logger = self._init_log()
