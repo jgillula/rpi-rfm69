@@ -8,7 +8,7 @@ thresholds = {2: 'red',
               6: 'yellow',
               10: 'green'}
 
-results = Run(['--disable=import-error,unused-wildcard-import,wildcard-import', '../../RFM69'], do_exit=False)
+results = Run(['--disable=import-error,unused-wildcard-import,wildcard-import', 'RFM69'], do_exit=False)
 # `exit` is deprecated, use `do_exit` instead
 badge = anybadge.Badge('pylint', round(results.linter.stats['global_note'], 2), thresholds=thresholds)
 badge.write_badge('pylint.svg')
