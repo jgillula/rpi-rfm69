@@ -18,4 +18,4 @@ jobs:
              pip install pylint
       - name: Analysing the code with pylint
         run: |
-             pylint --disable=C,R,import-error,unused-wildcard-import,wildcard-import RFM69
+             pylint --disable=C,import-error,unused-wildcard-import,wildcard-import RFM69

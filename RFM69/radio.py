@@ -613,7 +613,7 @@ class Radio:
     # ListenMode functions
     #
 
-    def _reinit_radio(self):
+    def _reinitRadio(self):
         if not self._initialize(self._freqBand, self.address, self._networkID):
             return False
         if self._encryptKey:
@@ -726,5 +726,5 @@ class Radio:
             timeRemaining = cycleDurationMs - (int(time.time()*1000) - startTime)
 
         self._setMode(RF69_MODE_STANDBY)
-        self._reinit_radio()
+        self._reinitRadio()
         self.begin_receive()
