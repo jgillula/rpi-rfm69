@@ -8,7 +8,6 @@ frfMID = {RF69_315MHZ: RF_FRFMID_315, RF69_433MHZ: RF_FRFMID_433,
 frfLSB = {RF69_315MHZ: RF_FRFLSB_315, RF69_433MHZ: RF_FRFLSB_433,
           RF69_868MHZ: RF_FRFLSB_868, RF69_915MHZ: RF_FRFLSB_915}
 
-# pylint: disable=missing-function-docstring
 def get_config(freqBand, networkID):
     return {
         0x01: [REG_OPMODE, RF_OPMODE_SEQUENCER_ON | RF_OPMODE_LISTEN_OFF | RF_OPMODE_STANDBY],

@@ -18,4 +18,4 @@ jobs:
              pip install pylint
       - name: Analysing the code with pylint
         run: |
-             pylint --disable=line-too-long,invalid-name,unused-wildcard-import,missing-module-docstring,too-many-instance-attributes,fixme,too-many-lines,wildcard-import,too-many-public-methods RFM69
+             pylint --disable=C,R,import-error,unused-wildcard-import,wildcard-import RFM69
