@@ -16,7 +16,18 @@ jobs:
         run: |
              python -m pip install --upgrade pip
              pip install pylint
-             pip install anybadge
       - name: Analysing the code with pylint
+        id: pylint
         run: |
              python3 .github/workflows/run_pylint.py
+      - name: Generating badge
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 385e5dc0d1b4f63dffa3de2db8695a69
+          filename: test.json
+          label: pylint
+          message: ${{ steps.pylint.outputs.rating }}
+          color: ${{ steps.pylint.outputs.color }}
+          namedLogo: Python
+          style: flat
