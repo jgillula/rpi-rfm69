@@ -447,7 +447,7 @@ class Radio:
 
         with self._sendLock:
             self._setMode(RF69_MODE_TX)
-            result = self._sendLock.wait(1.0)
+            self._sendLock.wait(1.0)
         self._setMode(RF69_MODE_RX)
 
     def _readRSSI(self, forceTrigger=False):
@@ -613,7 +613,7 @@ class Radio:
     # ListenMode functions
     #
 
-    def _reinitRadio(self):
+    def _reinit_radio(self):
         if not self._initialize(self._freqBand, self.address, self._networkID):
             return False
         if self._encryptKey:
@@ -726,5 +726,5 @@ class Radio:
             timeRemaining = cycleDurationMs - (int(time.time()*1000) - startTime)
 
         self._setMode(RF69_MODE_STANDBY)
-        self._reinitRadio()
+        self._reinit_radio()
         self.begin_receive()
