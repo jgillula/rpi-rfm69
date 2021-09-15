@@ -1,5 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/rpi-rfm69/badge/?version=latest)](https://rpi-rfm69.readthedocs.io/en/latest/?badge=latest)
-![badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/jgillula/385e5dc0d1b4f63dffa3de2db8695a69/raw/test.json)
+[![pylint Status](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/jgillula/385e5dc0d1b4f63dffa3de2db8695a69/raw/test.json)](https://github.com/jgillula/rpi-rfm69/actions/workflows/pylint.yml)
 
 
 # RFM69 Radio interface for the Raspberry Pi
