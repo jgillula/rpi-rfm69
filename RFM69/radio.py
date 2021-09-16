@@ -113,15 +113,15 @@ class Radio:
         time.sleep(0.3)
         #verify chip is syncing?
         start = time.time()
-        while self._readReg(REG_SYNCVALUE1) != 0xAA:
+        while self._readReg(REG_SYNCVALUE1) != 0xAA: # pragma: no cover
             self._writeReg(REG_SYNCVALUE1, 0xAA)
             if time.time() - start > 15:
-                raise Exception('Failed to sync with chip')
+                raise Exception('Failed to sync with radio')
         start = time.time()
-        while self._readReg(REG_SYNCVALUE1) != 0x55:
+        while self._readReg(REG_SYNCVALUE1) != 0x55: # pragma: no cover
             self._writeReg(REG_SYNCVALUE1, 0x55)
             if time.time() - start > 15:
-                raise Exception('Failed to sync with chip')
+                raise Exception('Failed to sync with radio')
 
     def _set_config(self, config):
         for value in config.values():
@@ -147,7 +147,7 @@ class Radio:
         """When context exits (including when the script is terminated)"""
         self._shutdown()
 
-    def set_frequency(self, FRF):
+    def set_frequency(self, FRF): # pragma: no cover
         """Set the radio frequency"""
         self._writeReg(REG_FRFMSB, FRF >> 16)
         self._writeReg(REG_FRFMID, FRF >> 8)
@@ -164,8 +164,9 @@ class Radio:
             network_id (int): Value between 1 and 254.
 
         """
-        assert isinstance(network_id, int) #type(network_id) == int
+        assert isinstance(network_id, int)
         assert network_id > 0 and network_id < 255
+        self._networkID = network_id
         self._writeReg(REG_SYNCVALUE2, network_id)
 
     def set_power_level(self, percent):
@@ -511,10 +512,10 @@ class Radio:
         self._spiLock.acquire()
         self.spi.close()
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return "Radio RFM69"
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return "Radio()"
 
     def _init_log(self):
@@ -528,11 +529,11 @@ class Radio:
         logger.propagate = False
         return logger
 
-    def _debug(self, *args):
+    def _debug(self, *args): # pragma: no cover
         if self.logger is not None:
             self.logger.debug(*args)
 
-    def _error(self, *args):
+    def _error(self, *args): # pragma: no cover
         if self.logger is not None:
             self.logger.error(*args)
 
@@ -541,7 +542,7 @@ class Radio:
     #
 
     # pylint: disable=unused-argument
-    def _interruptHandler(self, pin):
+    def _interruptHandler(self, pin): # pragma: no cover
         self._intLock.acquire()
         with self._modeLock:
             with self._sendLock:

@@ -32,12 +32,13 @@ def test_listen_mode_send_burst_threadsafe():
     try:
         TEST_LISTEN_MODE_SEND_BURST
         with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
-            test_message = "listen mode test"
+            # Try sending bytes instead of a string to get more test coverage
+            test_message = [108, 105, 115, 116, 101, 110, 32, 109, 111, 100, 101, 32, 116, 101, 115, 116] # this corresponds to the string "listen mode test"
             radio.listen_mode_send_burst(2, test_message)
             radio.begin_receive()
             packet = radio.get_packet(timeout=5)
             assert packet is not None
-            assert packet.data == [ord(x) for x in reversed(test_message)]
+            assert packet.data == [x for x in reversed(test_message)]
     except NameError:
         print("Skipping testing listen_mode_send_burst")
         pytest.skip("Skipping testing listen_mode_send_burst since it's not set up")

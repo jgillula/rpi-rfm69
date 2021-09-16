@@ -65,7 +65,7 @@ void setup() {
 #endif
   Serial.println("Setup complete");
 #if defined(RF69_LISTENMODE_ENABLE)
-  Serial.println("Note: Tests will include listenModeSendBurst");
+  Serial.println("Note: Tests will include listen_mode_send_burst");
 #else
   Serial.println("Note: Skipping testing listenModeSendBurst since it's not set up");
 #endif
