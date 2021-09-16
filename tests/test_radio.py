@@ -9,9 +9,6 @@ def test_transmit():
     with Radio(FREQUENCY, 1, 99, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
         # Test setting the network ID to the value we'll actually test with
         radio.set_network(100)
-        # This is just here for test coverage
-        radio._readRSSI(True)
-        registers = radio.read_registers()
         # Try sending to a node that isn't on, and don't require an ack
         success = radio.send(47, "Not a banana", attempts=1, require_ack=False)
         assert success == None
@@ -68,3 +65,16 @@ def test_listen_mode_send_burst():
     except NameError:
         print("Skipping testing listen_mode_send_burst")
         pytest.skip("Skipping testing listen_mode_send_burst since it's not set up")
+
+def test_general():
+    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
+        # This is just here for test coverage
+        radio._readRSSI(True)
+        registers = radio.read_registers()
+        # Get more test coverage in _canSend
+        radio.sleep()
+        assert radio._canSend() == False
+        # Put the radio in standby to do more test coverage for _canSend
+        radio._setMode(1)
+        assert radio._canSend() == True
+        radio._setMode(2)

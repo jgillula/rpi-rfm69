@@ -12,14 +12,7 @@ def test_transmit_threadsafe():
         assert packet == None
         # Then test sending a packet
         success = radio.send(2, "Banana", attempts=5, waitTime=1000)
-        assert success == True
-        # And get more test coverage in _canSend
-        radio.sleep()
-        assert radio._canSend() == False
-        # Put the radio in standby to do more test coverage for _canSend
-        radio._setMode(1)
-        assert radio._canSend() == True
-        
+        assert success == True        
 
 def test_receive_threadsafe():
     with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio: 
