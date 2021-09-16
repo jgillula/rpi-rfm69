@@ -20,8 +20,8 @@ Inside this directory in a Python 3 environment on your local machine (i.e. not 
 python3 -m venv venv_test
 source venv_test/bin/activate
 ```
-2. Edit [```config.py```](config.py) to choose the right frequency and pins
-3. (Optional) If you want to test listenModeSendBurst, uncomment the ```TEST_LISTEN_MODE_SEND_BURST``` flag in [```config.py```](config.py)
+2. Edit [```test_config.py```](test_config.py) to choose the right frequency and pins
+3. (Optional) If you want to test listenModeSendBurst, uncomment the ```TEST_LISTEN_MODE_SEND_BURST``` flag in [```test_config.py```](test_config.py)
 4. Run the following commands (still on your local machine, i.e. not on your Raspberry Pi).
 ```
 pip3 install --upgrade pip

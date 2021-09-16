@@ -64,9 +64,7 @@ class Radio:
         # ListenMode members
         self._isHighSpeed = True
         self._encryptKey = None
-        self.listenModeSetDurations(DEFAULT_LISTEN_RX_US, DEFAULT_LISTEN_IDLE_US)
-
-        self.sendSleepTime = 0.05
+        self.listen_mode_set_durations(DEFAULT_LISTEN_RX_US, DEFAULT_LISTEN_IDLE_US)
 
         self._packets = []
         self._packetLock = threading.Condition()
@@ -323,7 +321,7 @@ class Radio:
 
 
     @property
-    def packets(self):
+    def packets(self): # pragma: no cover
         print("WARNING! The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", file=sys.stderr)
         return self._packets
 
@@ -640,7 +638,7 @@ class Radio:
             return result + 1
         return result
 
-    def listenModeHighSpeed(self, highSpeed):
+    def listen_mode_set_high_speed(self, highSpeed):
         self._isHighSpeed = highSpeed
 
     def _chooseResolutionAndCoef(self, resolutions, duration):
@@ -653,7 +651,7 @@ class Radio:
         # out of range
         return (None, None)
 
-    def listenModeSetDurations(self, rxDuration, idleDuration):
+    def listen_mode_set_durations(self, rxDuration, idleDuration):
         rxResolutions = [RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000, 0]
         idleResolutions = [RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000, 0]
 
@@ -676,12 +674,12 @@ class Radio:
         self._listenCycleDurationUs = rxDuration + idleDuration
         return (rxDuration, idleDuration)
 
-    def listenModeGetDurations(self):
+    def listen_mode_get_durations(self):
         rxDuration = self._getUsForResolution(self._rxListenResolution) * self._rxListenCoef
         idleDuration = self._getUsForResolution(self._idleListenResolution) * self._idleListenCoef
         return (rxDuration, idleDuration)
 
-    def listenModeApplyHighSpeedSettings(self):
+    def _listenModeApplyHighSpeedSettings(self):
         if not self._isHighSpeed:
             return
         self._writeReg(REG_BITRATEMSB, RF_BITRATEMSB_200000)
@@ -691,7 +689,7 @@ class Radio:
         self._writeReg(REG_RXBW, RF_RXBW_DCCFREQ_000 | RF_RXBW_MANT_20 | RF_RXBW_EXP_0)
 
 
-    def listenModeSendBurst(self, toAddress, buff):
+    def listen_mode_send_burst(self, toAddress, buff):
         """Send a message to nodes in listen mode as a burst
 
         Args:
@@ -704,7 +702,7 @@ class Radio:
         self._writeReg(REG_PACKETCONFIG2, RF_PACKET2_RXRESTARTDELAY_NONE | RF_PACKET2_AUTORXRESTART_ON | RF_PACKET2_AES_OFF)
         self._writeReg(REG_SYNCVALUE1, 0x5A)
         self._writeReg(REG_SYNCVALUE2, 0x5A)
-        self.listenModeApplyHighSpeedSettings()
+        self._listenModeApplyHighSpeedSettings()
         self._writeReg(REG_FRFMSB, self._readReg(REG_FRFMSB) + 1)
         self._writeReg(REG_FRFLSB, self._readReg(REG_FRFLSB))      # MUST write to LSB to affect change!
 

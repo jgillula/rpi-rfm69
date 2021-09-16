@@ -1,8 +1,8 @@
 import pytest
 from RFM69 import Radio
-from config import *
+from test_config import *
 
-def test_config():
+def test_config_set_up():
     try:
         FREQUENCY
         INTERRUPT_PIN
@@ -10,7 +10,7 @@ def test_config():
         SPI_DEVICE
         IS_HIGH_POWER
     except NameError:
-        pytest.fail("You must define your radio configuration in tests/config.py in order to run the tests")
+        pytest.fail("You must define your radio configuration in tests/test_config.py in order to run the tests")
 
 
 def test_init_success():

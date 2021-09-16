@@ -1,4 +1,4 @@
 pytest
-pytest-timeout
+coveralls
 RPi.GPIO
 spidev

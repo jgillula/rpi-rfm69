@@ -2,7 +2,7 @@ import pytest
 import time
 import random
 from RFM69 import Radio, RF69_MAX_DATA_LEN
-from config import *
+from test_config import *
 
 
 def test_transmit_threadsafe():
@@ -28,16 +28,16 @@ def test_txrx_threadsafe():
         assert packet.data == [x for x in reversed(test_message)]
 
 
-def test_listenModeSendBurst_threadsafe():
+def test_listen_mode_send_burst_threadsafe():
     try:
         TEST_LISTEN_MODE_SEND_BURST
         with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
             test_message = "listen mode test"
-            radio.listenModeSendBurst(2, test_message)
+            radio.listen_mode_send_burst(2, test_message)
             radio.begin_receive()
             packet = radio.get_packet(timeout=5)
             assert packet is not None
             assert packet.data == [ord(x) for x in reversed(test_message)]
     except NameError:
-        print("Skipping testing listenModeSendBurst")
-        pytest.skip("Skipping testing listenModeSendBurst since it's not set up")
+        print("Skipping testing listen_mode_send_burst")
+        pytest.skip("Skipping testing listen_mode_send_burst since it's not set up")

@@ -4,16 +4,12 @@
 # This fabfile will setup and run test on a remote Raspberry Pi
 # =============================================================================
 
-import socket
-from os import sep, remove
-from fabric.api import cd, lcd, task
+from os import environ
+from fabric.api import cd, task, shell_env
 from fabric.operations import run, local, prompt, put, sudo
-from fabric.network import needs_host
 from fabric.state import env, output
 from fabric.contrib import files
 from fabric.contrib.project import rsync_project
-from fabtools import mysql
-from fabtools import user, group, require, deb
 from fabtools.python import virtualenv, install_requirements, install
 from termcolor import colored
 from unipath import Path, DIRS
@@ -24,19 +20,17 @@ from unipath import Path, DIRS
 
 class Settings:
     DEPLOY_USER = "pi"                      # Username for access to pi
-    ROOT_NAME = "rfm69-test"           # A system friendly name for test project
+    ROOT_NAME = "rpi-rfm69-test"                # A system friendly name for test project
     DIR_PROJ = "/srv/" + ROOT_NAME + "/"    # The root 
-    DIR_ENVS = DIR_PROJ + 'envs/'           # Where the Virtual will live
-    DIR_CODE = DIR_PROJ + 'tests/'          # Where the tests will live
+    DIR_ENVS = DIR_PROJ + 'envs/'           # Where the Virtual environment will live
+    DIR_CODE = DIR_PROJ + 'code/'           # Where the code will live
     
     SYNC_DIRS = [                      
-        ("./", DIR_CODE),
-        ("../RFM69", DIR_CODE),
-        ("../examples", DIR_CODE)
+        ("../", DIR_CODE),
     ]                  
     # Requirements
     REQUIREMENTS_FILES = [
-        DIR_CODE + 'requirements_remote.txt',
+        DIR_CODE + 'tests/requirements_remote.txt',
     ]
     TEST_PYTHON_VERSIONS = [ (3,7) ]
 
@@ -45,6 +39,11 @@ class Settings:
 # =============================================================================
 
 env.user = Settings.DEPLOY_USER
+
+@task
+def coverage():
+    sync_files()
+    run_coverage()
 
 @task
 def sync():
@@ -111,8 +110,8 @@ def sync_files():
         rsync_project(   
             remote_dir=remote_dir,
             local_dir=local_dir,
-            exclude=("fabfile.py","*.pyc",".git","*.db","*.sqlite3", "*.log", "*.csv", '__pycache__', '*.md','*.DS_Store', '*~', 'test-node/', 'requirements_local.txt', 'venv_test', 'example-node/'),
-            extra_opts="--filter 'protect *.csv' --filter 'protect *.json' --filter 'protect *.db'",
+            exclude=("*.pyc","*.db","*.sqlite3", "*.log", "*.csv", '__pycache__', '*.DS_Store', '*~', 'venv_*'),
+            extra_opts="--filter 'protect *.csv' --filter 'protect *.json' --filter 'protect *.db' --exclude-from=../.gitignore",
             delete=False
         )
 
@@ -156,4 +155,31 @@ def run_tests(py_version):
     print_test_title('Running tests in venv: {}'.format(env_path))
     with virtualenv(env_path):
         with cd(Settings.DIR_CODE):
-            run('pytest -x -rs')
+            run('coverage run --omit=RFM69/registers.py --branch --concurrency=thread --source=RFM69 -m pytest -x -rs tests/')
+
+def run_coverage():
+    py_version = Settings.TEST_PYTHON_VERSIONS[0]
+    env_path, _, _ = get_env(py_version)
+    print_test_title('Running coverage in venv: {}'.format(env_path))
+    with virtualenv(env_path):
+        with cd(Settings.DIR_CODE):
+            repo_token = None
+            need_to_rerun_tests = not files.exists(".coverage")
+            if not need_to_rerun_tests:
+                get_mtime_cmd = "date -r \"{}\" +%s"
+                coverage_last_run_time = int(run(get_mtime_cmd.format(".coverage"), quiet=True))
+                for filename in run("ls -1 tests/test_*.py", quiet=True).split() + run("ls -1 RFM69/*.py", quiet=True).split():
+                    mtime = int(run(get_mtime_cmd.format(filename), quiet=True))
+                    need_to_rerun_tests |= (mtime > coverage_last_run_time)
+            if need_to_rerun_tests:
+                print_title("Need to run tests to generate coverage file first")
+                run_tests(py_version)
+            if files.exists(".coverage"):
+                run('coverage report')
+                if "COVERALLS_REPO_TOKEN" not in environ:
+                    repo_token = prompt("Enter your coveralls repo_token to upload the results (or just hit enter to cancel):")
+                else:
+                    repo_token = environ["COVERALLS_REPO_TOKEN"]
+                if repo_token:
+                    with shell_env(COVERALLS_REPO_TOKEN=repo_token):
+                        run("coveralls")
