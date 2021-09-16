@@ -190,13 +190,12 @@ class Radio:
 
 
     def broadcast(self, buff=""):
-        """Broadcast a message to network i.e. sends to node 255 with no ACK request.
+        """Broadcast a message to network
 
         Args:
             buff (str): Message buffer to send
         """
-        broadcastAddress = 255
-        self.send(broadcastAddress, buff, require_ack=False)
+        self.send(RF69_BROADCAST_ADDR, buff, attempts=1, require_ack=False)
 
     def send(self, toAddress, buff="", **kwargs):
         """Send a message
@@ -220,7 +219,7 @@ class Radio:
             require_ack = True
 
         for _ in range(0, attempts):
-            self._send(toAddress, buff, attempts > 0)
+            self._send(toAddress, buff, attempts > 1)
 
             if not require_ack:
                 return None
@@ -369,7 +368,7 @@ class Radio:
 
     def _setMode(self, newMode):
         with self._modeLock:
-            if newMode == self.mode:
+            if newMode == self.mode or newMode not in [RF69_MODE_TX, RF69_MODE_RX, RF69_MODE_SYNTH, RF69_MODE_STANDBY, RF69_MODE_SLEEP]:
                 return
             if newMode == RF69_MODE_TX:
                 self.mode_name = "TX"
@@ -390,9 +389,6 @@ class Radio:
             elif newMode == RF69_MODE_SLEEP:
                 self.mode_name = "Sleep"
                 self._writeReg(REG_OPMODE, (self._readReg(REG_OPMODE) & 0xE3) | RF_OPMODE_SLEEP)
-            else:
-                self.mode_name = "Unknown"
-                return
             # we are using packet mode, so this check is not really needed
             # but waiting for mode ready is necessary when going from sleep because the FIFO may not be immediately available from previous mode
             while self.mode == RF69_MODE_SLEEP and self._readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY == 0x00:
@@ -564,7 +560,7 @@ class Radio:
 
                 data_length = payload_length - 3
                 ack_received = bool(CTLbyte & 0x80)
-                ack_requested = bool(CTLbyte & 0x40)
+                ack_requested = bool(CTLbyte & 0x40) and target_id == self.address # Only send back an ack if we're the intended recipient
                 with self._spiLock:
                     data = self.spi.xfer2([REG_FIFO & 0x7f] + [0 for i in range(0, data_length)])[1:]
                 rssi = self._readRSSI()
@@ -625,8 +621,6 @@ class Radio:
             return 4100
         elif resolution == RF_LISTEN1_RESOL_RX_262000 or resolution == RF_LISTEN1_RESOL_IDLE_262000:
             return 262000
-        else:
-            return 0
 
     def _getCoefForResolution(self, resolution, duration):
         resolDuration = self._getUsForResolution(resolution)

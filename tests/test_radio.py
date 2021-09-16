@@ -4,12 +4,6 @@ import random
 from RFM69 import Radio, RF69_MAX_DATA_LEN
 from test_config import *
 
-#Possible additional tests:
-# broadcast
-# send multiple attempts to ensure ack
-# send without ack
-# encrypt
-# promiscuous mode
 
 def test_transmit():
     with Radio(FREQUENCY, 1, 99, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
@@ -57,8 +51,12 @@ def test_listen_mode_send_burst():
     try:
         TEST_LISTEN_MODE_SEND_BURST
         with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
-            test_message = "listen mode test"
+            # For more test coverage, let's try setting the listen mode durations outside the acceptable range, like 70 seconds
+            radio.listen_mode_set_durations(256, 70000000)
+            radio.listen_mode_set_durations(70000000, 1000400)
+            # And then let's check and make sure the default values are still being used
             assert radio.listen_mode_get_durations() == (256, 1000400) # These are the default values
+            test_message = "listen mode test"
             radio.listen_mode_send_burst(2, test_message)
             timeout = time.time() + 5
             while (not radio.has_received_packet()) and (time.time() < timeout):

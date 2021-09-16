@@ -59,7 +59,7 @@ void setup() {
 #if defined(RF69_LISTENMODE_ENABLE)
   radio.listenModeEnd();
 #endif
-  radio.spyMode(true);
+
 #ifdef IS_RFM69HW_HCW
   radio.setHighPower(); //must include this only for RFM69HW/HCW!
 #endif
@@ -76,19 +76,39 @@ void setup() {
 char* data = null;
 uint8_t datalen = 0;
 
+bool use_encryption = false;
+
 void loop() {
   Serial.println("Ready to begin tests");
-  // All test names are as named in test_radio.py
   bool success;
   uint8_t numPassed = 0;
   uint8_t numFailed = 0;
 
+  // test_radio.py
+  radio.encrypt("sampleEncryptKey");
+  // This is a hack since there's a bug regarding listen mode and encryption in the RFM69 library
+  use_encryption = true;
+
+  RUN_TEST(test_broadcast_and_promiscuous_mode, 0);
+  
+  RUN_TEST(test_transmit, 0);
+  RUN_TEST(test_receive, 1000);
+  RUN_TEST(test_txrx, 0);
+#if defined(RF69_LISTENMODE_ENABLE)  
+  RUN_TEST(test_listenModeSendBurst, 0);
+#endif
+
+  // test_radio_threadsafe.py
+  radio.encrypt(0);
+  // This is a hack since there's a bug regarding listen mode and encryption in the RFM69 library
+  use_encryption = false;
   RUN_TEST(test_transmit, 0);
   RUN_TEST(test_receive, 1000);
   RUN_TEST(test_txrx, 0);
 #if defined(RF69_LISTENMODE_ENABLE)
   RUN_TEST(test_listenModeSendBurst, 0);
 #endif
+
 
   Serial.println(String("Tests complete: ") + numPassed + String(" passed, ") + numFailed + String(" failed."));
   Serial.println();
@@ -98,6 +118,21 @@ void loop() {
 // **********************************************************************************
 // Tests
 // **********************************************************************************
+
+bool test_broadcast_and_promiscuous_mode(String& failureReason) {
+  while (!radio.receiveDone()) delay(1);
+  getMessage(data, datalen);
+
+  char* response = new char[datalen];
+  for (uint8_t i = 0; i < datalen; i++) {
+    response[i] = data[datalen - i - 1];
+  }
+  Serial.println("Replying with '" + bufferToString(response, datalen) + "' (length " + String(datalen, DEC) + ")...");
+  delay(100);
+  radio.send(47, response, datalen);
+
+  return true;
+}
 
 bool test_transmit(String& failureReason) {
   bool result = false;
@@ -160,15 +195,17 @@ bool test_listenModeSendBurst(String& failureReason) {
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
   if (radio.DATALEN > 0) burst_time_remaining = radio.RF69_LISTEN_BURST_REMAINING_MS;
   getMessage(data, datalen);
-  radio.listenModeEnd();
+  Serial.println(String("Powering down for ") + burst_time_remaining + String("msec"));
   Serial.flush();
   LowPower.longPowerDown(burst_time_remaining);
+  radio.listenModeEnd();
   char* response = new char[datalen];
   for (uint8_t i = 0; i < datalen; i++) {
     response[i] = data[datalen - i - 1];
   }
-  Serial.println("Replying with '" + bufferToString(response, datalen) + "' (length " + String(datalen, DEC) + ")...");
-  delay(500);
+  if(use_encryption) radio.encrypt("sampleEncryptKey");
+  delay(10);
+  Serial.println("Replying with '" + bufferToString(response, datalen) + "' (length " + String(datalen, DEC) + ")...");  
   bool result = radio.sendWithRetry(1, response, datalen, 5, 1000);
   if (!result) {
     failureReason = String("No ack to our message");

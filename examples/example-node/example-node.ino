@@ -57,10 +57,11 @@ void setup() {
 #if defined(RF69_LISTENMODE_ENABLE)
   radio.listenModeEnd();
 #endif
-  radio.spyMode(true);
+
 #ifdef IS_RFM69HW_HCW
   radio.setHighPower(); //must include this only for RFM69HW/HCW!
 #endif
+
   Serial.println("Setup complete");
   Serial.println();
 }

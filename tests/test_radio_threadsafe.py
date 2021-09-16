@@ -35,6 +35,8 @@ def test_txrx_threadsafe():
         test_message = [random.randint(0,255) for i in range(RF69_MAX_DATA_LEN+10)]
         success = radio.send(2, test_message, attempts=5, waitTime=100)
         assert success == True
+        # If we sleep for one second, the packet should already be there so we can get more code coverage in testing
+        time.sleep(1)
         packet = radio.get_packet(timeout=5)
         assert packet is not None
         assert packet.data == [x for x in reversed(test_message[0:RF69_MAX_DATA_LEN])]
