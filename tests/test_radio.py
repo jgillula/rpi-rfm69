@@ -8,21 +8,27 @@ from test_config import *
 # broadcast
 # send multiple attempts to ensure ack
 # send without ack
-# fail to get ack
 # encrypt
 # promiscuous mode
 
 def test_transmit():
-    with Radio(FREQUENCY, 1, 99, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
+    with Radio(FREQUENCY, 1, 99, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
         # Test setting the network ID to the value we'll actually test with
         radio.set_network(100)
+        # This is just here for test coverage
+        radio._readRSSI(True)
         registers = radio.read_registers()
+        # Try sending to a node that isn't on, and don't require an ack
+        success = radio.send(47, "Not a banana", attempts=1, require_ack=False)
+        assert success == None
+        # Try sending to a node that isn't on, and require an ack, should return false
+        success = radio.send(47, "This should return false", attempts=2, waitTime=10)
+        assert success == False
         success = radio.send(2, "Banana", attempts=5, waitTime=100)
         assert success == True
-        radio._readRSSI(True)
 
 def test_receive():
-    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio: 
+    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio: 
         timeout = time.time() + 5
         while time.time() < timeout:
             if radio.num_packets() > 0:
@@ -34,7 +40,7 @@ def test_receive():
         return False
             
 def test_txrx():
-    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
+    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
         test_message = [random.randint(0,255) for i in range(RF69_MAX_DATA_LEN)]
         success = radio.send(2, test_message, attempts=5, waitTime=100)
         assert success == True
@@ -50,7 +56,7 @@ def test_txrx():
 def test_listen_mode_send_burst():
     try:
         TEST_LISTEN_MODE_SEND_BURST
-        with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER) as radio:
+        with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
             test_message = "listen mode test"
             assert radio.listen_mode_get_durations() == (256, 1000400) # These are the default values
             radio.listen_mode_send_burst(2, test_message)

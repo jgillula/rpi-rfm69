@@ -60,6 +60,7 @@ class Radio:
         self.mode_name = ""
 
         self.address = None
+        self._networkID = None
 
         # ListenMode members
         self._isHighSpeed = True
@@ -91,8 +92,6 @@ class Radio:
         self._freqBand = freqBand
         self._networkID = networkID
         self._init_interrupt()
-
-        return True
 
     def _init_gpio(self):
         GPIO.setmode(GPIO.BOARD)
@@ -613,13 +612,11 @@ class Radio:
     #
 
     def _reinitRadio(self):
-        if not self._initialize(self._freqBand, self.address, self._networkID):
-            return False
+        self._initialize(self._freqBand, self.address, self._networkID)
         if self._encryptKey:
             self._encrypt(self._encryptKey) # Restore the encryption key if necessary
         if self._isHighSpeed:
             self._writeReg(REG_LNA, (self._readReg(REG_LNA) & ~0x3) | RF_LNA_GAINSELECT_AUTO)
-        return True
 
     def _getUsForResolution(self, resolution):
         if resolution == RF_LISTEN1_RESOL_RX_64 or resolution == RF_LISTEN1_RESOL_IDLE_64:
