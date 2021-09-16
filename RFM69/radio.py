@@ -636,9 +636,6 @@ class Radio:
             return result + 1
         return result
 
-    def listen_mode_set_high_speed(self, highSpeed):
-        self._isHighSpeed = highSpeed
-
     def _chooseResolutionAndCoef(self, resolutions, duration):
         for resolution in resolutions:
             coef = self._getCoefForResolution(resolution, duration)
@@ -650,8 +647,8 @@ class Radio:
         return (None, None)
 
     def listen_mode_set_durations(self, rxDuration, idleDuration):
-        rxResolutions = [RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000, 0]
-        idleResolutions = [RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000, 0]
+        rxResolutions = [RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000]
+        idleResolutions = [RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000]
 
         (resolOut, coefOut) = self._chooseResolutionAndCoef(rxResolutions, rxDuration)
         if resolOut and coefOut:
