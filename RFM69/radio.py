@@ -319,6 +319,7 @@ class Radio:
         self._sendFrame(toAddress, buff, False, True)
 
 
+    # pylint: disable=missing-function-docstring
     @property
     def packets(self): # pragma: no cover
         print("WARNING! The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", file=sys.stderr)
@@ -513,6 +514,7 @@ class Radio:
     def __repr__(self): # pragma: no cover
         return "Radio()"
 
+    # pylint: disable=no-self-use
     def _init_log(self):
         logging.basicConfig(level=logging.DEBUG)
         logger = logging.getLogger(__name__)
@@ -622,6 +624,8 @@ class Radio:
         elif resolution == RF_LISTEN1_RESOL_RX_262000 or resolution == RF_LISTEN1_RESOL_IDLE_262000:
             return 262000
 
+        return 0 # pragma: no cover
+
     def _getCoefForResolution(self, resolution, duration):
         resolDuration = self._getUsForResolution(resolution)
         result = int(duration / resolDuration)
@@ -641,6 +645,19 @@ class Radio:
         return (None, None)
 
     def listen_mode_set_durations(self, rxDuration, idleDuration):
+        """Set the duty cycle for listen mode
+
+        The values used may be slightly different to accomodate what
+        is allowed by the radio. This function returns the actual
+        values used.
+
+        Args:
+            rxDuration (int): number of microseconds to be in receive mode
+            idleDuration (int): number of microseconds to be sleeping
+
+        Returns:
+            (int, int): the actual (rxDuration, idleDuration) used
+        """
         rxResolutions = [RF_LISTEN1_RESOL_RX_64, RF_LISTEN1_RESOL_RX_4100, RF_LISTEN1_RESOL_RX_262000]
         idleResolutions = [RF_LISTEN1_RESOL_IDLE_64, RF_LISTEN1_RESOL_IDLE_4100, RF_LISTEN1_RESOL_IDLE_262000]
 
