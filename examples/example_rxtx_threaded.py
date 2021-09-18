@@ -1,3 +1,5 @@
+# pylint: disable=missing-function-docstring,unused-import
+
 import time
 import threading
 from RFM69 import Radio, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
@@ -32,4 +34,4 @@ with Radio(FREQ_915MHZ, node_id, network_id, isHighPower=True, verbose=False, in
             print ("Acknowledgement received")
         else:
             print ("No Acknowledgement")
-        
+
