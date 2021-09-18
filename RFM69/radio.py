@@ -308,7 +308,7 @@ class Radio:
 
 
     def send_ack(self, toAddress, buff=""):
-        """Send an acknowledgemet packet
+        """Send an acknowledgement packet
 
         Args:
             toAddress (int): Recipient node's ID

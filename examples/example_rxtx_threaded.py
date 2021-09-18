@@ -1,6 +1,6 @@
-from RFM69 import Radio, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 import time
 import threading
+from RFM69 import Radio, FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 
 node_id = 1
 network_id = 100
@@ -28,7 +28,7 @@ with Radio(FREQ_915MHZ, node_id, network_id, isHighPower=True, verbose=False, in
         # After 5 seconds send a message
         time.sleep(5)
         print ("Sending")
-        if radio.send(2, "TEST", attempts=3, waitTime=100):
+        if radio.send(recipient_id, "TEST", attempts=3, waitTime=100):
             print ("Acknowledgement received")
         else:
             print ("No Acknowledgement")
