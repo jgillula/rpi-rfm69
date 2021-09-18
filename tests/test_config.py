@@ -1,4 +1,4 @@
-# pylint: disable=bad-whitespace,unused-import,missing-docstring
+# pylint: disable=unused-import,missing-docstring
 
 from RFM69 import FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 
