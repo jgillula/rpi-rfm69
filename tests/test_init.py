@@ -1,3 +1,5 @@
+# pylint: disable=pointless-statement,missing-docstring
+
 import pytest
 from RFM69 import Radio
 from test_config import *
@@ -15,7 +17,7 @@ def test_config_set_up():
 
 def test_init_success():
     radio = Radio(FREQUENCY, 1, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE)
-    assert type(radio) == Radio
+    assert isinstance(radio, Radio)
 
 def test_init_bad_interupt():
     with pytest.raises(ValueError) as _:

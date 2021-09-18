@@ -1,4 +1,5 @@
 #encoding:UTF-8
+# pylint: disable=missing-docstring
 
 # =============================================================================
 # This fabfile will setup and run test on a remote Raspberry Pi
@@ -6,36 +7,36 @@
 
 from os import environ
 from fabric.api import cd, task, shell_env
-from fabric.operations import run, local, prompt, put, sudo
-from fabric.state import env, output
+from fabric.operations import run, prompt, sudo
+from fabric.state import env
 from fabric.contrib import files
 from fabric.contrib.project import rsync_project
-from fabtools.python import virtualenv, install_requirements, install
+from fabtools.python import virtualenv, install_requirements
 from termcolor import colored
-from unipath import Path, DIRS
+from git import Repo
 
 # =============================================================================
-# SETTINGS 
+# SETTINGS
 # =============================================================================
 
 class Settings:
     DEPLOY_USER = "pi"                      # Username for access to pi
     ROOT_NAME = "rpi-rfm69-test"                # A system friendly name for test project
-    DIR_PROJ = "/srv/" + ROOT_NAME + "/"    # The root 
+    DIR_PROJ = "/srv/" + ROOT_NAME + "/"    # The root
     DIR_ENVS = DIR_PROJ + 'envs/'           # Where the Virtual environment will live
     DIR_CODE = DIR_PROJ + 'code/'           # Where the code will live
-    
-    SYNC_DIRS = [                      
+
+    SYNC_DIRS = [
         ("../", DIR_CODE),
-    ]                  
+    ]
     # Requirements
     REQUIREMENTS_FILES = [
         DIR_CODE + 'tests/requirements_remote.txt',
     ]
-    TEST_PYTHON_VERSIONS = [ (3,7) ]
+    TEST_PYTHON_VERSIONS = [ (3,7) ] # pylint: disable=bad-whitespace
 
 # =============================================================================
-# END OF SETTINGS 
+# END OF SETTINGS
 # =============================================================================
 
 env.user = Settings.DEPLOY_USER
@@ -64,7 +65,6 @@ def init():
         create_virtualenv(version)
         install_venv_requirements(version)
 
- 
 # =============================================================================
 # SUB TASKS
 # =============================================================================
@@ -75,17 +75,17 @@ def init():
 
 def print_title(title):
     pad = "-" * (80 - len(title) - 4)
-    print (colored("-- {} {}".format(title,pad), 'blue', 'on_yellow'))
+    print(colored("-- {} {}".format(title, pad), 'blue', 'on_yellow'))
 
 def print_test_title(title):
     pad = "-" * (80 - len(title) - 4)
-    print (colored("-- {} {}".format(title,pad), 'white', 'on_blue'))
+    print(colored("-- {} {}".format(title, pad), 'white', 'on_blue'))
 
 def print_error(message):
-    print (colored(message, 'red'))
+    print(colored(message, 'red'))
 
 def print_success(message):
-    print (colored(message, 'green'))
+    print(colored(message, 'green'))
 
 # ----------------------------------------------------------------------------------------
 # Sub Tasks - Project
@@ -94,7 +94,7 @@ def print_success(message):
 # Make project folders
 def make_dirs():
     print_title('Making folders')
-    for d in [Settings.DIR_PROJ, Settings.DIR_ENVS] + [ y for x, y in Settings.SYNC_DIRS]:
+    for d in [Settings.DIR_PROJ, Settings.DIR_ENVS] + [y for x, y in Settings.SYNC_DIRS]:
         exists = files.exists(d)
         print("File", d, "exists?", exists)
         if not exists:
@@ -107,10 +107,11 @@ def sync_files():
     print_title('Synchronising code')
     for local_dir, remote_dir in Settings.SYNC_DIRS:
         print('Copy from {} to {}'.format(local_dir, remote_dir))
-        rsync_project(   
+        rsync_project(
             remote_dir=remote_dir,
             local_dir=local_dir,
-            exclude=("*.pyc","*.db","*.sqlite3", "*.log", "*.csv", '__pycache__', '*.DS_Store', '*~', 'venv_*'),
+            exclude=("*.pyc", "*.db", "*.sqlite3", "*.log", "*.csv",
+                     '__pycache__', '*.DS_Store', '*~', 'venv_*'),
             extra_opts="--filter 'protect *.csv' --filter 'protect *.json' --filter 'protect *.db' --exclude-from=../.gitignore",
             delete=False
         )
@@ -139,7 +140,7 @@ def create_virtualenv(py_version):
 
 # Install Python requirments
 def install_venv_requirements(py_version):
-    env_path, ver_name, env_name = get_env(py_version)
+    env_path, _, _ = get_env(py_version)
     print_title('Installing remote virtual env requirements')
     with virtualenv(env_path):
         for path in Settings.REQUIREMENTS_FILES:
@@ -158,6 +159,32 @@ def run_tests(py_version):
             run('coverage run --omit=RFM69/registers.py --branch --concurrency=thread --source=RFM69 -m pytest -x -rs tests/')
 
 def run_coverage():
+    repo = Repo("../.")
+
+    uncommitted_files = []
+    for diff in repo.head.commit.diff(None):
+        file_path = diff.b_rawpath.decode("utf-8")
+        if file_path.startswith("RFM69"):
+            uncommitted_files.append(file_path)
+    active_branch = repo.active_branch
+    repo.remote().fetch()
+    num_unpushed_commits = len(list(repo.iter_commits("{0}@{{u}}..{0}".format(active_branch))))
+    num_unpulled_commits = len(list(repo.iter_commits("{0}..{0}@{{u}}".format(active_branch))))
+    if uncommitted_files:
+        print("There are uncommitted changes in your repository:")
+        for file_path in uncommitted_files:
+            print(file_path)
+    if num_unpushed_commits > 0:
+        print("Your branch is ahead of '{}/{}' by {} commit(s)".format(repo.remote().name, active_branch, num_unpushed_commits))
+    if num_unpulled_commits > 0:
+        print("Your branch is behind '{}/{}' by {} commit(s)".format(repo.remote().name, active_branch, num_unpulled_commits))
+    if (uncommitted_files or
+        num_unpushed_commits > 0 or
+        num_unpulled_commits > 0):
+        run_anyway = prompt("Continue running coverage anyway?", default="N")
+        if run_anyway.lower() not in ["y", "yes"]:
+            return
+
     py_version = Settings.TEST_PYTHON_VERSIONS[0]
     env_path, _, _ = get_env(py_version)
     print_test_title('Running coverage in venv: {}'.format(env_path))

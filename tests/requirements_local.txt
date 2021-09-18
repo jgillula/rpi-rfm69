@@ -1,4 +1,4 @@
 termcolor
-unipath
 fabric3
 fabtools3
+GitPython

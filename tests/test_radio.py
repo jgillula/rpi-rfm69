@@ -1,6 +1,8 @@
-import pytest
+# pylint: disable=pointless-statement,missing-docstring,protected-access
+
 import time
 import random
+import pytest
 from RFM69 import Radio, RF69_MAX_DATA_LEN
 from test_config import *
 
@@ -11,15 +13,15 @@ def test_transmit():
         radio.set_network(100)
         # Try sending to a node that isn't on, and don't require an ack
         success = radio.send(47, "Not a banana", attempts=1, require_ack=False)
-        assert success == None
+        assert success is None
         # Try sending to a node that isn't on, and require an ack, should return false
         success = radio.send(47, "This should return false", attempts=2, waitTime=10)
-        assert success == False
+        assert success is False
         success = radio.send(2, "Banana", attempts=5, waitTime=100)
-        assert success == True
+        assert success is True
 
 def test_receive():
-    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio: 
+    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
         timeout = time.time() + 5
         while time.time() < timeout:
             if radio.num_packets() > 0:
@@ -29,12 +31,12 @@ def test_receive():
                     return True
             time.sleep(0.01)
         return False
-            
+
 def test_txrx():
     with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
-        test_message = [random.randint(0,255) for i in range(RF69_MAX_DATA_LEN)]
+        test_message = [random.randint(0, 255) for i in range(RF69_MAX_DATA_LEN)]
         success = radio.send(2, test_message, attempts=5, waitTime=100)
-        assert success == True
+        assert success is True
         timeout = time.time() + 5
         while (not radio.has_received_packet()) and (time.time() < timeout):
             time.sleep(0.01)
@@ -70,11 +72,11 @@ def test_general():
     with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
         # This is just here for test coverage
         radio._readRSSI(True)
-        registers = radio.read_registers()
+        radio.read_registers()
         # Get more test coverage in _canSend
         radio.sleep()
-        assert radio._canSend() == False
+        assert radio._canSend() is False
         # Put the radio in standby to do more test coverage for _canSend
         radio._setMode(1)
-        assert radio._canSend() == True
+        assert radio._canSend() is True
         radio._setMode(2)

@@ -1,4 +1,5 @@
-import pytest
+# pylint: disable=missing-docstring
+
 from RFM69 import Packet
 
 def test_packet():
