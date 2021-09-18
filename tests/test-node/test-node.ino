@@ -88,8 +88,6 @@ void loop() {
   radio.encrypt("sampleEncryptKey");
   // This is a hack since there's a bug regarding listen mode and encryption in the RFM69 library
   use_encryption = true;
-
-  RUN_TEST(test_broadcast_and_promiscuous_mode, 0);
   
   RUN_TEST(test_transmit, 0);
   RUN_TEST(test_receive, 1000);
@@ -97,6 +95,9 @@ void loop() {
 #if defined(RF69_LISTENMODE_ENABLE)  
   RUN_TEST(test_listenModeSendBurst, 0);
 #endif
+
+  // test_radio_broadcast.py
+  RUN_TEST(test_broadcast_and_promiscuous_mode, 0);
 
   // test_radio_threadsafe.py
   radio.encrypt(0);
