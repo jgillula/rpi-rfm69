@@ -9,7 +9,7 @@ thresholds = {3: 'red',
               10: 'green',
               math.inf: 'brightgreen'}
 
-results = Run(['--disable=import-error,unused-wildcard-import,wildcard-import,line-too-long,invalid-name,missing-module-docstring,too-many-lines,too-many-instance-attributes', 'RFM69'], do_exit=False)
+results = Run(['--disable=import-error,unused-wildcard-import,wildcard-import,line-too-long,invalid-name,missing-module-docstring,too-many-lines,too-many-instance-attributes,consider-using-f-string', 'RFM69'], do_exit=False)
 rating = results.linter.stats['global_note']
 print("##[set-output name=rating]{:.2f}".format(rating))
 for value in thresholds.keys():
