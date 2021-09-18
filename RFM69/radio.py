@@ -4,7 +4,7 @@ import logging
 import threading
 
 import spidev
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO # pylint: disable=consider-using-from-import
 
 from .registers import *
 from .packet import Packet
