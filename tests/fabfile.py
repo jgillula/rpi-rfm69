@@ -33,7 +33,7 @@ class Settings:
     REQUIREMENTS_FILES = [
         DIR_CODE + 'tests/requirements_remote.txt',
     ]
-    TEST_PYTHON_VERSIONS = [ (3,7) ] # pylint: disable=bad-whitespace
+    TEST_PYTHON_VERSIONS = [ (3,7) ] # pylint: disable=
 
 # =============================================================================
 # END OF SETTINGS

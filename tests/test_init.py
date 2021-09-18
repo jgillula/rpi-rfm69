@@ -1,8 +1,8 @@
-# pylint: disable=pointless-statement,missing-docstring
+# pylint: disable=pointless-statement,missing-docstring,undefined-variable
 
 import pytest
-from RFM69 import Radio
 from test_config import *
+from RFM69 import Radio
 
 def test_config_set_up():
     try:

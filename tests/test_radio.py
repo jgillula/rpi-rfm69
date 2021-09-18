@@ -1,10 +1,10 @@
-# pylint: disable=pointless-statement,missing-docstring,protected-access
+# pylint: disable=pointless-statement,missing-docstring,protected-access,undefined-variable
 
 import time
 import random
 import pytest
-from RFM69 import Radio, RF69_MAX_DATA_LEN
 from test_config import *
+from RFM69 import Radio, RF69_MAX_DATA_LEN
 
 
 def test_transmit():
@@ -42,7 +42,7 @@ def test_txrx():
             time.sleep(0.01)
         assert radio.has_received_packet()
         packets = radio.get_packets()
-        assert packets[0].data == [x for x in reversed(test_message)]
+        assert packets[0].data == list(reversed(test_message))
         time.sleep(1.0)
 
 

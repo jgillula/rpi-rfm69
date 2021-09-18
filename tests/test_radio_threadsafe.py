@@ -1,10 +1,10 @@
-# pylint: disable=pointless-statement,missing-docstring
+# pylint: disable=pointless-statement,missing-docstring,undefined-variable
 
 import time
 import random
 import pytest
-from RFM69 import Radio, RF69_MAX_DATA_LEN
 from test_config import *
+from RFM69 import Radio, RF69_MAX_DATA_LEN
 
 
 def test_transmit_threadsafe():
@@ -34,7 +34,7 @@ def test_txrx_threadsafe():
         time.sleep(1)
         packet = radio.get_packet(timeout=5)
         assert packet is not None
-        assert packet.data == [x for x in reversed(test_message[0:RF69_MAX_DATA_LEN])]
+        assert packet.data == list(reversed(test_message[0:RF69_MAX_DATA_LEN]))
 
 
 def test_listen_mode_send_burst_threadsafe():
@@ -47,7 +47,7 @@ def test_listen_mode_send_burst_threadsafe():
             radio.begin_receive()
             packet = radio.get_packet(timeout=5)
             assert packet is not None
-            assert packet.data == [x for x in reversed(test_message)]
+            assert packet.data == list(reversed(test_message))
     except NameError:
         print("Skipping testing listen_mode_send_burst")
         pytest.skip("Skipping testing listen_mode_send_burst since it's not set up")

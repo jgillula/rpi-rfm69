@@ -1,8 +1,8 @@
-# pylint: disable=protected-access,missing-docstring
+# pylint: disable=protected-access,missing-docstring,undefined-variable
 
 import random
-from RFM69 import Radio, RF69_MAX_DATA_LEN
 from test_config import *
+from RFM69 import Radio, RF69_MAX_DATA_LEN
 
 
 def test_broadcast_and_promiscuous_mode():
@@ -13,5 +13,5 @@ def test_broadcast_and_promiscuous_mode():
         # And we expect to get it back by promiscuous mode
         radio._promiscuous(True)
         packet = radio.get_packet()
-        assert packet.data == [x for x in reversed(test_message)]
+        assert packet.data == list(reversed(test_message))
         assert packet.receiver != 1
