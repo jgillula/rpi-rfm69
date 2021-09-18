@@ -26,13 +26,21 @@ source venv_test/bin/activate
 ```
 pip3 install --upgrade pip
 pip3 install -r requirements_local.txt
-fab init -H raspberrypi.local 
+fab -H raspberrypi.local init
 ```
 where ```raspberrypi.local``` is the hostname of your Raspberry Pi.
 
 ## Run tests on remote environment
 From inside your testing environment on your local machine run:
 ```
-fab test -H raspberrypi.local 
+fab -H raspberrypi.local test
 ```
 where ```raspberrypi.local``` is the hostname of your Raspberry Pi.
+
+## Generate and upload test coverage data
+1. From inside your testing environment on your local machine run the following line. (This will also run tests first if any relevant files have changed since coverage data was last generated.)
+```
+fab -H raspberrypi.local coverage
+```
+2. If your local repo is not on the same commit as the origin repo (i.e. the Github repo) or if you have untracked files, the script will ask you if you still want to proceed. (This is necessary because [coveralls.io](https://coveralls.io/github/jgillula/rpi-rfm69) needs to pull a copy of the repo from Github to show its analysis, and if the local code you're testing is different, the analysis won't match.)
+3. Copy the coveralls repo token from [https://coveralls.io/github/jgillula/rpi-rfm69](https://coveralls.io/github/jgillula/rpi-rfm69) and provide it when prompted.

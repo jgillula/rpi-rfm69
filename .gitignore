@@ -8,6 +8,7 @@ docs/build
 *.vscode
 \#*\#
 *~
+.coverage
 
 # Setuptools distribution folder.
 /dist/
