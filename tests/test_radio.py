@@ -3,6 +3,7 @@
 import time
 import random
 import pytest
+import RPi.GPIO as GPIO
 from test_config import *
 from RFM69 import Radio, RF69_MAX_DATA_LEN
 
@@ -33,7 +34,13 @@ def test_receive():
         return False
 
 def test_txrx():
-    with Radio(FREQUENCY, 1, 100, verbose=True, interruptPin=INTERRUPT_PIN, resetPin=RESET_PIN, spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
+    # For more test coverage, we'll test this using BCM pin numbers
+    # To do that, we have to cleanup the entire GPIO object first
+    GPIO.setwarnings(False)
+    GPIO.cleanup()
+    # The format of this dict is (Raspberry Pi pin number: GPIO number)
+    board_to_bcm_map = {3: 2, 5: 3, 7: 4, 8: 14, 10: 15, 11: 17, 12: 18, 13: 27, 15: 22, 16: 23, 18: 24, 19: 10, 21: 9, 22: 25, 23: 11, 24: 8, 26: 7, 27: 0, 28: 1, 29: 5, 31: 6, 32: 12, 33: 13, 35: 19, 36: 16, 37: 26, 38: 20, 40: 21}
+    with Radio(FREQUENCY, 1, 100, verbose=True, use_board_pin_numbers=False, interruptPin=board_to_bcm_map[INTERRUPT_PIN], resetPin=board_to_bcm_map[RESET_PIN], spiDevice=SPI_DEVICE, isHighPower=IS_HIGH_POWER, encryptionKey="sampleEncryptKey") as radio:
         test_message = [random.randint(0, 255) for i in range(RF69_MAX_DATA_LEN)]
         success = radio.send(2, test_message, attempts=5, waitTime=100)
         assert success is True
@@ -44,7 +51,8 @@ def test_txrx():
         packets = radio.get_packets()
         assert packets[0].data == list(reversed(test_message))
         time.sleep(1.0)
-
+    # Since we used BCM pin numbers, we have to clean up all of GPIO again
+    GPIO.cleanup()
 
 def test_listen_mode_send_burst():
     try:

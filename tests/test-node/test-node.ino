@@ -88,11 +88,11 @@ void loop() {
   radio.encrypt("sampleEncryptKey");
   // This is a hack since there's a bug regarding listen mode and encryption in the RFM69 library
   use_encryption = true;
-  
+
   RUN_TEST(test_transmit, 0);
   RUN_TEST(test_receive, 1000);
   RUN_TEST(test_txrx, 0);
-#if defined(RF69_LISTENMODE_ENABLE)  
+#if defined(RF69_LISTENMODE_ENABLE)
   RUN_TEST(test_listenModeSendBurst, 0);
 #endif
 
@@ -204,9 +204,9 @@ bool test_listenModeSendBurst(String& failureReason) {
   for (uint8_t i = 0; i < datalen; i++) {
     response[i] = data[datalen - i - 1];
   }
-  if(use_encryption) radio.encrypt("sampleEncryptKey");
+  if (use_encryption) radio.encrypt("sampleEncryptKey");
   delay(10);
-  Serial.println("Replying with '" + bufferToString(response, datalen) + "' (length " + String(datalen, DEC) + ")...");  
+  Serial.println("Replying with '" + bufferToString(response, datalen) + "' (length " + String(datalen, DEC) + ")...");
   bool result = radio.sendWithRetry(1, response, datalen, 5, 1000);
   if (!result) {
     failureReason = String("No ack to our message");

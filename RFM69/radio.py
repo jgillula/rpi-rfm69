@@ -2,6 +2,7 @@ import sys
 import time
 import logging
 import threading
+import warnings
 
 import spidev
 import RPi.GPIO as GPIO # pylint: disable=consider-using-from-import
@@ -27,6 +28,7 @@ class Radio:
         auto_acknowledge (bool): Automatically send acknowledgements
         isHighPower (bool): Is this a high power radio model
         power (int): Power level - a percentage in range 10 to 100.
+        use_board_pin_numbers (bool): Use BOARD (not BCM) pin numbers. Defaults to True.
         interruptPin (int): Pin number of interrupt pin. This is a pin index not a GPIO number.
         resetPin (int): Pin number of reset pin. This is a pin index not a GPIO number.
         spiBus (int): SPI bus number.
@@ -43,8 +45,9 @@ class Radio:
 
         self.auto_acknowledge = kwargs.get('autoAcknowledge', True)
         self.isRFM69HW = kwargs.get('isHighPower', True)
-        self.intPin = kwargs.get('interruptPin', 18)
-        self.rstPin = kwargs.get('resetPin', 29)
+        self._use_board_pin_numbers = kwargs.get('use_board_pin_numbers', True)
+        self.intPin = kwargs.get('interruptPin', 18 if self._use_board_pin_numbers else 24)
+        self.rstPin = kwargs.get('resetPin', 29 if self._use_board_pin_numbers else 5)
         self.spiBus = kwargs.get('spiBus', 0)
         self.spiDevice = kwargs.get('spiDevice', 0)
         self.promiscuousMode = kwargs.get('promiscuousMode', 0)
@@ -94,7 +97,10 @@ class Radio:
         self._init_interrupt()
 
     def _init_gpio(self):
-        GPIO.setmode(GPIO.BOARD)
+        if self._use_board_pin_numbers:
+            GPIO.setmode(GPIO.BOARD)
+        else:
+            GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.intPin, GPIO.IN)
         GPIO.setup(self.rstPin, GPIO.OUT)
 
@@ -321,8 +327,9 @@ class Radio:
 
     # pylint: disable=missing-function-docstring
     @property
-    def packets(self): # pragma: no cover
-        print("WARNING! The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", file=sys.stderr)
+    def packets(self):
+        warnings.simplefilter("default")
+        warnings.warn("The packets property will be deprecated in a future version. Please use get_packets() and num_packets() instead.", DeprecationWarning)
         return self._packets
 
 
@@ -500,6 +507,7 @@ class Radio:
 
         Puts the radio to sleep and cleans up the GPIO connections.
         """
+        GPIO.remove_event_detect(self.intPin)
         self._modeLock.acquire()
         self._setHighPower(False)
         self.sleep()
