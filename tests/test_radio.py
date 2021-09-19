@@ -3,7 +3,7 @@
 import time
 import random
 import pytest
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO # pylint: disable=consider-using-from-import
 from test_config import *
 from RFM69 import Radio, RF69_MAX_DATA_LEN
 
