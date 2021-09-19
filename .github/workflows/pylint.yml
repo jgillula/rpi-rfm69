@@ -18,8 +18,7 @@ jobs:
              pip install pylint
       - name: Analysing the code with pylint
         id: pylint
-        run: |
-             python3 .github/workflows/run_pylint.py
+        run: python3 .github/workflows/run_pylint.py
       - name: Generating badge
         uses: schneegans/dynamic-badges-action@v1.1.0
         with:
@@ -31,3 +30,7 @@ jobs:
           color: ${{ steps.pylint.outputs.color }}
           namedLogo: Python
           style: flat
+      - name: Return final success code
+        env:
+          linting_status: ${{ steps.pylint.outputs.linting_status }}
+        run: python3 .github/workflows/finish_pylint.py

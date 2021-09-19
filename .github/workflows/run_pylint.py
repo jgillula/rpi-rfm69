@@ -15,6 +15,7 @@ results = Run(['--disable=import-error,unused-wildcard-import,wildcard-import,li
 if results.linter.stats["fatal"] + results.linter.stats["error"] + results.linter.stats["warning"] > 0:
     print("##[set-output name=rating]failing!")
     print("##[set-output name=color]red")
+    print("##[set-output name=linting_status]failed")
 else:
     rating = results.linter.stats['global_note']
     print("##[set-output name=rating]{:.2f}".format(rating))
@@ -22,4 +23,5 @@ else:
         if rating < value:
             print("##[set-output name=color]{}".format(thresholds[value]))
             break
+    print("##[set-output name=linting_status]passed")
 sys.exit(0)

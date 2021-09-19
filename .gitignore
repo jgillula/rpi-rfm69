@@ -9,6 +9,7 @@ docs/build
 \#*\#
 *~
 .coverage
+.\#*
 
 # Setuptools distribution folder.
 /dist/
