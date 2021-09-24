@@ -3,7 +3,7 @@
 Part of these instructions are cribbed from [https://packaging.python.org/tutorials/packaging-projects/](https://packaging.python.org/tutorials/packaging-projects/), and are meant for a Linux OS. They assume you've already set up an account and [gotten an API token on pypi.org](https://pypi.org/manage/account/#api-tokens).
 
 1. Create a branch named with the new version number, if you haven't already
-1. Ensure that the version number is set in [```../setup.py```](../setup.py)
+1. Ensure that the version number is set in [```../VERSION```](../VERSION)
 1. Make sure to update [```../CHANGELOG.md```](../CHANGELOG.md)
 1. Update the documentation as necessary
 1. Make sure all the tests pass per the instructions at [```../tests/readme.md```](../tests/readme.md)
