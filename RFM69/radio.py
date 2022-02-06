@@ -156,6 +156,24 @@ class Radio:
         self._writeReg(REG_FRFMSB, FRF >> 16)
         self._writeReg(REG_FRFMID, FRF >> 8)
         self._writeReg(REG_FRFLSB, FRF)
+        
+    def set_frequency_in_Hz(self, frequency_in_Hz): # pragma: no cover
+        """Set the radio frequency in Hertz
+
+        Args:
+            frequency_in_Hz (int): Value between 315000000 to 915000000 Hz.
+
+        """        
+        step = 61.03515625
+        freq = int(round(frequency_in_Hz / step))
+        self._writeReg(REG_FRFMSB, freq >> 16)
+        self._writeReg(REG_FRFMID, freq >> 8)
+        self._writeReg(REG_FRFLSB, freq)
+
+    def getFrequency_in_Hz(self):
+        step = 61.03515625
+        freq = (self._readReg(REG_FRFMSB) << 16) + (self._readReg(REG_FRFMID) << 8) + self._readReg(REG_FRFLSB)
+        return int(round(freq * step))
 
     def sleep(self):
         """Put the radio into sleep mode"""
