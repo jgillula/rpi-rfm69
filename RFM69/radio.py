@@ -50,6 +50,9 @@ class Radio:
         self.spiBus = kwargs.get('spiBus', 0)
         self.spiDevice = kwargs.get('spiDevice', 0)
         self.promiscuousMode = kwargs.get('promiscuousMode', 0)
+        self.enableATC = kwargs.get('enableATC', False)
+
+        self.lastRSSI = 0
 
         # Thread-safe locks
         self._spiLock = threading.Lock()
@@ -333,7 +336,7 @@ class Radio:
             return packets
 
 
-    def send_ack(self, toAddress, buff=""):
+    def send_ack(self, toAddress, buff=[]):
         """Send an acknowledgement packet
 
         Args:
@@ -342,6 +345,14 @@ class Radio:
         """
         while not self._canSend():
             pass #self.has_received_packet()
+
+        # Convert buff to list of int if it's a string so the RSSI can be inserted
+        if isinstance(buff, str):
+            buff = [int(ord(i)) for i in list(buff)]
+
+        # Insert absolute value of RSSI before any message
+        if self.enableATC:
+            buff = buff + [int(abs(self.lastRSSI))]
         self._sendFrame(toAddress, buff, False, True)
 
 
@@ -459,13 +470,15 @@ class Radio:
         ack = 0
         if sendACK:
             ack = 0x80
+            if self.enableATC:
+                ack |= 0x20
         elif requestACK:
             ack = 0x40
         with self._spiLock:
             if isinstance(buff, str):
-                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 3, toAddress, self.address, ack] + [int(ord(i)) for i in list(buff)])
-            else:
-                self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 3, toAddress, self.address, ack] + buff)
+                buff = [int(ord(i)) for i in list(buff)]
+
+            self.spi.xfer2([REG_FIFO | 0x80, len(buff) + 3, toAddress, self.address, ack] + buff)
 
         with self._sendLock:
             self._setMode(RF69_MODE_TX)
@@ -593,7 +606,7 @@ class Radio:
                 ack_requested = bool(CTLbyte & 0x40) and target_id == self.address # Only send back an ack if we're the intended recipient
                 with self._spiLock:
                     data = self.spi.xfer2([REG_FIFO & 0x7f] + [0 for i in range(0, data_length)])[1:]
-                rssi = self._readRSSI()
+                self.lastRSSI = self._readRSSI()
 
                 if ack_received:
                     self._debug("Incoming ack from {}".format(sender_id))
@@ -614,7 +627,7 @@ class Radio:
                     # )
                     with self._packetLock:
                         self._packets.append(
-                            Packet(int(target_id), int(sender_id), int(rssi), list(data))
+                            Packet(int(target_id), int(sender_id), int(self.lastRSSI), list(data))
                         )
                         self._packetLock.notify_all()
 
