@@ -469,7 +469,8 @@ class Radio:
 
         with self._sendLock:
             self._setMode(RF69_MODE_TX)
-            self._sendLock.wait(1.0)
+            while (self._readReg(REG_IRQFLAGS2) & RF_IRQFLAGS2_PACKETSENT) == 0x00:
+                pass
         self._setMode(RF69_MODE_RX)
 
     def _readRSSI(self, forceTrigger=False):
