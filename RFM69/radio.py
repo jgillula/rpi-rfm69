@@ -290,7 +290,7 @@ class Radio:
             list: Register values
         """
         results = []
-        for address in range(1, 0x50):
+        for address in range(1, 0x5D):
             results.append([str(hex(address)), str(bin(self._readReg(address)))])
         return results
 
