@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+- Added support for ATC mode (thanks @MxMarx)
+- Reduced some hang (thanks @MxMarx)
+- Extended registers retrieved to include High Power PA settings (thanks @tomtastic)
+
 ## 0.5.1
 - Added support for radios without reset pins
 
