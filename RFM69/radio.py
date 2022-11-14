@@ -33,6 +33,7 @@ class Radio:
         spiBus (int): SPI bus number.
         spiDevice (int): SPI device number.
         promiscuousMode (bool): Listen to all messages not just those addressed to this node ID.
+        enableATC (bool): Enable ATC mode. Defaults to False.
         encryptionKey (str): 16 character encryption key.
         verbose (bool): Verbose mode - Activates logging to console.
     """
