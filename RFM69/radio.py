@@ -332,7 +332,7 @@ class Radio:
         # return packets
         with self._packetLock:
             packets = list(self._packets)
-            self._packets = []
+            self._packets = [] # pylint: disable=dangerous-default-value
             return packets
 
 
@@ -343,7 +343,7 @@ class Radio:
             toAddress (int): Recipient node's ID
 
         """
-        while not self._canSend():
+        while not self._canSend(): # pragma: no cover
             pass #self.has_received_packet()
 
         # Convert buff to list of int if it's a string so the RSSI can be inserted
@@ -444,7 +444,7 @@ class Radio:
             self.begin_receive()
             return True
         #if signal stronger than -100dBm is detected assume channel activity - removed self.PAYLOADLEN == 0 and
-        elif self.mode == RF69_MODE_RX and self._readRSSI() < CSMA_LIMIT:
+        elif self.mode == RF69_MODE_RX and self._readRSSI() < CSMA_LIMIT: # pylint: disable=no-else-return
             self._setMode(RF69_MODE_STANDBY)
             return True
         return False
@@ -556,7 +556,6 @@ class Radio:
     def __repr__(self): # pragma: no cover
         return "Radio()"
 
-    # pylint: disable=no-self-use
     def _init_log(self):
         logging.basicConfig(level=logging.DEBUG)
         logger = logging.getLogger(__name__)
@@ -593,8 +592,7 @@ class Radio:
                 with self._spiLock:
                     payload_length, target_id, sender_id, CTLbyte = self.spi.xfer2([REG_FIFO & 0x7f, 0, 0, 0, 0])[1:]
 
-                if payload_length > 66:
-                    payload_length = 66
+                payload_length = min(payload_length, 66)
 
                 if not (self.promiscuousMode or target_id == self.address or target_id == RF69_BROADCAST_ADDR):
                     self._debug("Ignore Interrupt")
@@ -658,6 +656,7 @@ class Radio:
         if self._isHighSpeed:
             self._writeReg(REG_LNA, (self._readReg(REG_LNA) & ~0x3) | RF_LNA_GAINSELECT_AUTO)
 
+    # pylint: disable=no-else-return
     def _getUsForResolution(self, resolution): # pragma: no cover
         if resolution == RF_LISTEN1_RESOL_RX_64 or resolution == RF_LISTEN1_RESOL_IDLE_64:
             return 64

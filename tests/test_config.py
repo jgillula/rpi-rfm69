@@ -37,3 +37,11 @@ from RFM69 import FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 
 # Uncomment to test ListenMode
 # TEST_LISTEN_MODE_SEND_BURST = True
+
+# Uncomment to test ATC mode
+# ATC_MODE = True
+
+try:
+    ATC_MODE
+except NameError:
+    ATC_MODE = False
