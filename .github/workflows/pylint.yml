@@ -18,7 +18,7 @@ jobs:
              pip install pylint>=2.12.2
       - name: Analysing the code with pylint
         id: pylint
-        run: python3 .github/workflows/run_pylint.py >> $GITHUB_OUTPUT
+        run: python3 .github/workflows/run_pylint.py
       - name: Generating badge
         uses: schneegans/dynamic-badges-action@v1.1.0
         with:
