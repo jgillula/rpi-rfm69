@@ -18,7 +18,7 @@ Pinout guide
 
     PI Name, 3v3 [#f1]_ ,	Ground,	MOSI, MISO, SCLK, ID_SC [#f2]_ , CE0	 
     PI GPIO [#f3]_, , , 10, 9, 11, , 8, 5
-    PI Pin, 17, 20, 19, 21, 23, 18, 24, 22
+    PI Pin, 17, 20, 19, 21, 23, 18, 24, 29
     Adafruit, Vin, GND, MOSI, MISO, CLK, G0, CS, RST
     Sparkfun, 3.3v, GND, MOSI,	MISO, SCK, DIO0, NSS, RESET
 
