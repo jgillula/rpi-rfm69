@@ -2,6 +2,7 @@ import time
 import logging
 import threading
 import warnings
+import struct
 
 import spidev
 import RPi.GPIO as GPIO # pylint: disable=consider-using-from-import
@@ -52,6 +53,7 @@ class Radio:
         self.spiDevice = kwargs.get('spiDevice', 0)
         self.promiscuousMode = kwargs.get('promiscuousMode', 0)
         self.enableATC = kwargs.get('enableATC', False)
+        self.enableRSSIack = kwargs.get('rssiACK', True)
 
         self.lastRSSI = 0
 
@@ -631,11 +633,18 @@ class Radio:
                         )
                         self._packetLock.notify_all()
 
-                # Send acknowledgement if needed
                 if ack_requested and self.auto_acknowledge:
                     self._debug("Sending an ack")
                     self._intLock.release()
                     self.send_ack(sender_id)
+                    self.begin_receive()
+                    return
+                    
+                if ack_requested and self.enableRSSIack:
+                    rssi_back =  list(struct.pack('B', abs(self.lastRSSI)))
+                    self._intLock.release()
+                    self.send_ack(sender_id, rssi_back)
+                    self._debug("RSSI ack sent")
                     self.begin_receive()
                     return
 
