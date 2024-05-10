@@ -55,7 +55,7 @@ class Radio:
         self.enableATC = kwargs.get('enableATC', False)
 
         self.powerLevel = 31
-        self.enableRSSIack = kwargs.get('rssiACK', True)
+        self.enableRSSIack = kwargs.get('rssiACK', False)
 
         self.lastRSSI = 0
 
@@ -698,20 +698,24 @@ class Radio:
                         )
                         self._packetLock.notify_all()
 
+                # if ack_requested by sender node and auto_acknowledge enabled, ack has to be sent
                 if ack_requested and self.auto_acknowledge:
-                    self._debug("Sending an ack")
-                    self._intLock.release()
-                    self.send_ack(sender_id)
-                    self.begin_receive()
-                    return
-                    
-                if ack_requested and self.enableRSSIack:
-                    rssi_back =  list(struct.pack('B', abs(self.lastRSSI)))
-                    self._intLock.release()
-                    self.send_ack(sender_id, rssi_back)
-                    self._debug("RSSI ack sent")
-                    self.begin_receive()
-                    return
+                    # if RSSI ack enabled a special ACK message is sent back
+                    if self.enableRSSIack:
+                        self._debug("Sending an RSSI ack")
+                        rssi_back =  list(struct.pack('B', abs(self.lastRSSI)))
+                        self._intLock.release()
+                        self.send_ack(sender_id, rssi_back)
+                        self._debug("RSSI ack sent")
+                        self.begin_receive()
+                        return
+                   # if RSSI ack is NOT enabled a normal ACK message is sent back 
+                    else:
+                        self._debug("Sending a normal ack")
+                        self._intLock.release()
+                        self.send_ack(sender_id)
+                        self.begin_receive()
+                        return                 
 
                 self._intLock.release()
                 self.begin_receive()
