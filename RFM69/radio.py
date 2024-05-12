@@ -132,12 +132,12 @@ class Radio:
         while self._readReg(REG_SYNCVALUE1) != 0xAA: # pragma: no cover
             self._writeReg(REG_SYNCVALUE1, 0xAA)
             if time.time() - start > 15:
-                raise Exception('Failed to sync with radio')
+                raise Exception('Failed to sync with radio') # pylint: disable=broad-exception-raised
         start = time.time()
         while self._readReg(REG_SYNCVALUE1) != 0x55: # pragma: no cover
             self._writeReg(REG_SYNCVALUE1, 0x55)
             if time.time() - start > 15:
-                raise Exception('Failed to sync with radio')
+                raise Exception('Failed to sync with radio') # pylint: disable=broad-exception-raised
 
     def _set_config(self, config):
         for value in config.values():
@@ -221,14 +221,14 @@ class Radio:
         assert isinstance(percent, int) #type(percent) == int
         # self.powerLevel = int(round(31 * (percent / 100)))
         # self._writeReg(REG_PALEVEL, (self._readReg(REG_PALEVEL) & 0xE0) | self.powerLevel)
-        
+
         powerLevel_new = int(round(31 * (percent / 100)))
         if self.isRFM69HW:
             if powerLevel_new > 23:
                 powerLevel_new = 23
-            
+
             self.powerLevel = powerLevel_new
-                
+
             # now set Pout value & active PAs based on _powerLevel range as outlined in summary above
             if self.powerLevel < 16:
                 powerLevel_new += 16
@@ -239,37 +239,37 @@ class Radio:
                 else:
                     powerLevel_new += 8
                 PA_SETTING = RF_PALEVEL_PA1_ON | RF_PALEVEL_PA2_ON # enable PA1+PA2
-                
+
             self.set_HighPower_Regs(True) # always call this in case we're crossing power boundaries in TX mode
-            
+
         else:   # this is a W/CW, register value is the same as _powerLevel
             if powerLevel_new > 31:
                 powerLevel_new = 31
             self.powerLevel = powerLevel_new
             PA_SETTING = RF_PALEVEL_PA0_ON # enable PA0 only
-            
+
          # write value to REG_PALEVEL
-        self._writeReg(REG_PALEVEL, PA_SETTING | powerLevel_new);    
-          
+        self._writeReg(REG_PALEVEL, PA_SETTING | powerLevel_new)
+
     # for RFM69 HW/HCW only switching off over current protection
     def set_HighPower(self, _isRFM69HW_HCW):
         assert isinstance(_isRFM69HW_HCW, bool)
-        
-        self.isRFM69HW = _isRFM69HW_HCW;
+
+        self.isRFM69HW = _isRFM69HW_HCW
         if self.isRFM69HW:
             self._writeReg(REG_OCP,RF_OCP_OFF) # disable OverCurrentProtection for HW/HCW
         else:
             self._writeReg(REG_OCP,RF_OCP_ON)
-        
+
         self.set_power_level(self.powerLevel)
 
     # for HW/HCW only:
     # enables HiPower for 18-20dBm output
     # should only be used with PA1+PA2
     def set_HighPower_Regs(self, enable):
-    
+
         assert isinstance(enable, bool)
-    
+
         if (not self.isRFM69HW) or self.powerLevel < 20:
             self._writeReg(REG_TESTPA1, 0x55)
             self._writeReg(REG_TESTPA2, 0x70)
@@ -404,7 +404,7 @@ class Radio:
             return packets
 
 
-    def send_ack(self, toAddress, buff=[]):
+    def send_ack(self, toAddress, buff=[]): # pylint: disable=dangerous-default-value
         """Send an acknowledgement packet
 
         Args:
@@ -508,7 +508,7 @@ class Radio:
         self._writeReg(REG_NODEADRS, self.address)
 
     def _canSend(self):
-        if self.mode == RF69_MODE_STANDBY:
+        if self.mode == RF69_MODE_STANDBY: # pylint: disable=no-else-return
             self.begin_receive()
             return True
         #if signal stronger than -100dBm is detected assume channel activity - removed self.PAYLOADLEN == 0 and
@@ -709,13 +709,13 @@ class Radio:
                         self._debug("RSSI ack sent")
                         self.begin_receive()
                         return
-                   # if RSSI ack is NOT enabled a normal ACK message is sent back 
+                   # if RSSI ack is NOT enabled a normal ACK message is sent back
                     else:
                         self._debug("Sending a normal ack")
                         self._intLock.release()
                         self.send_ack(sender_id)
                         self.begin_receive()
-                        return                 
+                        return
 
                 self._intLock.release()
                 self.begin_receive()
