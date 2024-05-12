@@ -20,7 +20,7 @@ jobs:
         id: pylint
         run: python3 .github/workflows/run_pylint.py
       - name: Generating badge
-        uses: schneegans/dynamic-badges-action@v1.1.0
+        uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 385e5dc0d1b4f63dffa3de2db8695a69
