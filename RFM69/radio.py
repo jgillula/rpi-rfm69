@@ -2,6 +2,7 @@ import time
 import logging
 import threading
 import warnings
+import struct
 
 import spidev
 import RPi.GPIO as GPIO # pylint: disable=consider-using-from-import
@@ -53,6 +54,9 @@ class Radio:
         self.promiscuousMode = kwargs.get('promiscuousMode', 0)
         self.enableATC = kwargs.get('enableATC', False)
 
+        self.powerLevel = 31
+        self.enableRSSIack = kwargs.get('rssiACK', False)
+
         self.lastRSSI = 0
 
         # Thread-safe locks
@@ -84,6 +88,8 @@ class Radio:
 
         self._encrypt(kwargs.get('encryptionKey', 0))
         self.set_power_level(kwargs.get('power', 70))
+        if self.isRFM69HW:
+            self.set_HighPower(True)
 
 
     def _initialize(self, freqBand, nodeID, networkID):
@@ -198,6 +204,13 @@ class Radio:
         self._networkID = network_id
         self._writeReg(REG_SYNCVALUE2, network_id)
 
+    # for RFM69 W/CW the range is from 0-31 [-18dBm to 13dBm] (PA0 only on RFIO pin)
+    # for RFM69 HW/HCW the range is from 0-22 [-2dBm to 20dBm]  (PA1 & PA2 on PA_BOOST pin & high Power PA settings - see section 3.3.7 in datasheet, p22)
+    # the HW/HCW 0-24 range is split into 3 REG_PALEVEL parts:
+    # 0-15 = REG_PALEVEL 16-31, ie [-2 to 13dBm] & PA1 only
+    # 16-19 = REG_PALEVEL 26-29, ie [12 to 15dBm] & PA1+PA2
+    # 20-23 = REG_PALEVEL 28-31, ie [17 to 20dBm] & PA1+PA2+HiPower (HiPower is only enabled before going in TX mode, ie by setMode(RF69_MODE_TX)
+    # The HW/HCW range overlaps are to smooth out transitions between the 3 PA domains, based on actual current/RSSI measurements
     def set_power_level(self, percent):
         """Set the transmit power level
 
@@ -206,9 +219,63 @@ class Radio:
 
         """
         assert isinstance(percent, int) #type(percent) == int
-        self.powerLevel = int(round(31 * (percent / 100)))
-        self._writeReg(REG_PALEVEL, (self._readReg(REG_PALEVEL) & 0xE0) | self.powerLevel)
+        # self.powerLevel = int(round(31 * (percent / 100)))
+        # self._writeReg(REG_PALEVEL, (self._readReg(REG_PALEVEL) & 0xE0) | self.powerLevel)
+        
+        powerLevel_new = int(round(31 * (percent / 100)))
+        if self.isRFM69HW:
+            if powerLevel_new > 23:
+                powerLevel_new = 23
+            
+            self.powerLevel = powerLevel_new
+                
+            # now set Pout value & active PAs based on _powerLevel range as outlined in summary above
+            if self.powerLevel < 16:
+                powerLevel_new += 16
+                PA_SETTING = RF_PALEVEL_PA1_ON # enable PA1 only
+            else:
+                if self.powerLevel < 20:
+                    powerLevel_new += 10
+                else:
+                    powerLevel_new += 8
+                PA_SETTING = RF_PALEVEL_PA1_ON | RF_PALEVEL_PA2_ON # enable PA1+PA2
+                
+            self.set_HighPower_Regs(True) # always call this in case we're crossing power boundaries in TX mode
+            
+        else:   # this is a W/CW, register value is the same as _powerLevel
+            if powerLevel_new > 31:
+                powerLevel_new = 31
+            self.powerLevel = powerLevel_new
+            PA_SETTING = RF_PALEVEL_PA0_ON # enable PA0 only
+            
+         # write value to REG_PALEVEL
+        self._writeReg(REG_PALEVEL, PA_SETTING | powerLevel_new);    
+          
+    # for RFM69 HW/HCW only switching off over current protection
+    def set_HighPower(self, _isRFM69HW_HCW):
+        assert isinstance(_isRFM69HW_HCW, bool)
+        
+        self.isRFM69HW = _isRFM69HW_HCW;
+        if self.isRFM69HW:
+            self._writeReg(REG_OCP,RF_OCP_OFF) # disable OverCurrentProtection for HW/HCW
+        else:
+            self._writeReg(REG_OCP,RF_OCP_ON)
+        
+        self.set_power_level(self.powerLevel)
 
+    # for HW/HCW only:
+    # enables HiPower for 18-20dBm output
+    # should only be used with PA1+PA2
+    def set_HighPower_Regs(self, enable):
+    
+        assert isinstance(enable, bool)
+    
+        if (not self.isRFM69HW) or self.powerLevel < 20:
+            self._writeReg(REG_TESTPA1, 0x55)
+            self._writeReg(REG_TESTPA2, 0x70)
+        else:
+            self._writeReg(REG_TESTPA1, 0x5D)
+            self._writeReg(REG_TESTPA2, 0x7C)
 
     def _send(self, toAddress, buff="", requestACK=False):
         self._writeReg(REG_PACKETCONFIG2,
@@ -631,13 +698,24 @@ class Radio:
                         )
                         self._packetLock.notify_all()
 
-                # Send acknowledgement if needed
+                # if ack_requested by sender node and auto_acknowledge enabled, ack has to be sent
                 if ack_requested and self.auto_acknowledge:
-                    self._debug("Sending an ack")
-                    self._intLock.release()
-                    self.send_ack(sender_id)
-                    self.begin_receive()
-                    return
+                    # if RSSI ack enabled a special ACK message is sent back
+                    if self.enableRSSIack:
+                        self._debug("Sending an RSSI ack")
+                        rssi_back =  list(struct.pack('B', abs(self.lastRSSI)))
+                        self._intLock.release()
+                        self.send_ack(sender_id, rssi_back)
+                        self._debug("RSSI ack sent")
+                        self.begin_receive()
+                        return
+                   # if RSSI ack is NOT enabled a normal ACK message is sent back 
+                    else:
+                        self._debug("Sending a normal ack")
+                        self._intLock.release()
+                        self.send_ack(sender_id)
+                        self.begin_receive()
+                        return                 
 
                 self._intLock.release()
                 self.begin_receive()

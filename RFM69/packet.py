@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import time
 
 class Packet:
     """Object to represent received packet. Created internally and
@@ -14,10 +15,11 @@ class Packet:
     """
 
     # Declare slots to reduce memory
-    __slots__ = 'received', 'receiver', 'sender', 'RSSI', 'data'
+    __slots__ = 'received', 'received_epoch', 'receiver', 'sender', 'RSSI', 'data'
 
     def __init__(self, receiver, sender, RSSI, data):
         self.received = datetime.utcnow()
+        self.received_epoch = int(time.time()*1000)
         self.receiver = receiver
         self.sender = sender
         self.RSSI = RSSI
