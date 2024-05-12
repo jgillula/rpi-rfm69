@@ -5,7 +5,7 @@ from pylint.lint import Run
 import pylint
 
 def save_env_var(env_var, value):
-    env_filename = os.getenv('GITHUB_ENV')
+    env_filename = os.getenv('GITHUB_OUTPUT')
     with open(env_filename, "a") as env_file:
         env_file.write("{}={}".format(env_var, value))
 
