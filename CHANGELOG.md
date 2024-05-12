@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.0
+- RFM69HW and HCW specific functions and power level setting added by @Makodan
+
 ## 0.6.0
 - Added support for ATC mode (thanks @MxMarx)
 - Reduced some hang (thanks @MxMarx)
