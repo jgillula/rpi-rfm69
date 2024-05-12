@@ -42,6 +42,6 @@ from RFM69 import FREQ_315MHZ, FREQ_433MHZ, FREQ_868MHZ, FREQ_915MHZ
 # ATC_MODE = True
 
 try:
-    ATC_MODE
+    ATC_MODE # pylint: disable=used-before-assignment
 except NameError:
     ATC_MODE = False
